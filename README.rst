@@ -19,10 +19,52 @@ The main features are:
 - Create sequences (series) of content and export them to PDF, epub, plaintext,
   or any other format supported by `pandoc <https://pandoc.org/>`_.
 
+- Persistent user accounts.
+
 Configuration
 -------------
 
-More here soon...
+To configure ``django-overcomingbias-pages``, add the following to your settings:
+
+.. code-block:: python
+
+  # add required apps
+  INSTALLED_APPS = [
+    # required for admin site / user accounts
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    # for collecting static files
+    "django.contrib.staticfiles",
+    # django-overcomingbias-api
+    "ordered_model",
+    "obapi",
+    # haystack search
+    "haystack",
+    # django-overcomingbias-pages
+    "obpages",
+  ]
+
+  # Use the (custom) obpages user model 
+  AUTH_USER_MODEL = "obpages.User"
+
+
+To configure search, follow the instructions on the
+`django-haystack <https://django-haystack.readthedocs.io/en/master/>`_
+doc pages.
+If you don't care about search, just set up a dummy backend by adding this to your
+settings:
+
+.. code-block:: python
+
+  # django-haystack dummy backend
+  HAYSTACK_CONNECTIONS = {
+    "default": {
+      "ENGINE": "haystack.backends.simple_backend.SimpleEngine",
+    },
+  }
 
 
 Bugs/Requests
