@@ -1,5 +1,5 @@
-django-overcomingbias-pages: web interface to Robin Hanson's content
-====================================================================
+django-overcomingbias-pages: a web interface to Robin Hanson's content
+======================================================================
 
 ``django-overcomingbias-pages`` is a standalone `Django <https://www.djangoproject.com/>`_
 app which provides a web interface to Robin Hanson's content.
@@ -9,12 +9,12 @@ Features
 
 The main features are:
 
-- Scrape content from across the web `overcomingbias <https://overcomingbias.com/>`_,
+- Scrape content from across the web (`overcomingbias <https://overcomingbias.com/>`_,
   `YouTube <https://www.youtube.com/>`_, `Spotify <https://spotify.com/>`_
-  and more via the admin site.
+  and more) via the admin site.
 
-- Search content using `elasticsearch <https://www.elastic.co/>`_
-  or browse by topic.
+- Search content with
+  `django-haystack <https://django-haystack.readthedocs.io/en/master/>`_.
 
 - Create sequences (series) of content and export them to PDF, epub, plaintext,
   or any other format supported by `pandoc <https://pandoc.org/>`_.
@@ -52,14 +52,13 @@ To configure ``django-overcomingbias-pages``, add the following to your settings
 
 
 To configure search, follow the instructions on the
-`django-haystack <https://django-haystack.readthedocs.io/en/master/>`_
+`haystack <https://django-haystack.readthedocs.io/en/master/>`_
 doc pages.
-If you don't care about search, just set up a dummy backend by adding this to your
-settings:
+If you don't care about search, just add this to your settings:
 
 .. code-block:: python
 
-  # django-haystack dummy backend
+  # dummy backend for django-haystack
   HAYSTACK_CONNECTIONS = {
     "default": {
       "ENGINE": "haystack.backends.simple_backend.SimpleEngine",
