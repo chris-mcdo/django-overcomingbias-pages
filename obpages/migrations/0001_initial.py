@@ -1,6 +1,7 @@
 import django.contrib.auth.models
 import django.contrib.auth.validators
 import django.utils.timezone
+import obapi.modelfields
 from django.db import migrations, models
 
 
@@ -13,6 +14,29 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.CreateModel(
+            name="SearchIndex",
+            fields=[
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+            ],
+            options={
+                "verbose_name_plural": "Search Indexes",
+                "permissions": (
+                    ("update_search_index", "Can update the search index"),
+                    ("rebuild_search_index", "Can rebuild the search index"),
+                ),
+                "managed": False,
+                "default_permissions": (),
+            },
+        ),
         migrations.CreateModel(
             name="User",
             fields=[
@@ -36,10 +60,8 @@ class Migration(migrations.Migration):
                     "is_superuser",
                     models.BooleanField(
                         default=False,
-                        help_text=(
-                            "Designates that this user has all permissions without"
-                            " explicitly assigning them."
-                        ),
+                        help_text="Designates that this user has all permissions"
+                        " without explicitly assigning them.",
                         verbose_name="superuser status",
                     ),
                 ),
@@ -49,10 +71,8 @@ class Migration(migrations.Migration):
                         error_messages={
                             "unique": "A user with that username already exists."
                         },
-                        help_text=(
-                            "Required. 150 characters or fewer. Letters, digits and"
-                            " @/./+/-/_ only."
-                        ),
+                        help_text="Required. 150 characters or fewer."
+                        " Letters, digits and @/./+/-/_ only.",
                         max_length=150,
                         unique=True,
                         validators=[
@@ -83,9 +103,8 @@ class Migration(migrations.Migration):
                     "is_staff",
                     models.BooleanField(
                         default=False,
-                        help_text=(
-                            "Designates whether the user can log into this admin site."
-                        ),
+                        help_text="Designates whether the user can log into this admin"
+                        " site.",
                         verbose_name="staff status",
                     ),
                 ),
@@ -93,10 +112,8 @@ class Migration(migrations.Migration):
                     "is_active",
                     models.BooleanField(
                         default=True,
-                        help_text=(
-                            "Designates whether this user should be treated as active."
-                            " Unselect this instead of deleting accounts."
-                        ),
+                        help_text="Designates whether this user should be treated as"
+                        " active. Unselect this instead of deleting accounts.",
                         verbose_name="active",
                     ),
                 ),
@@ -107,13 +124,17 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
+                    "slug",
+                    obapi.modelfields.SimpleSlugField(
+                        editable=False, max_length=150, unique=True
+                    ),
+                ),
+                (
                     "groups",
                     models.ManyToManyField(
                         blank=True,
-                        help_text=(
-                            "The groups this user belongs to. A user will get all"
-                            " permissions granted to each of their groups."
-                        ),
+                        help_text="The groups this user belongs to. A user will get"
+                        " all permissions granted to each of their groups.",
                         related_name="user_set",
                         related_query_name="user",
                         to="auth.group",
