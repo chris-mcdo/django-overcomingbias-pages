@@ -41,10 +41,12 @@ class SearchIndexAdmin(admin.ModelAdmin):
             if "_update" in request.POST:
                 required_permission = "obpages.update_search_index"
                 action = "update_index"
+                args = ["--remove"]
                 success_message = "Updated Index!"
             elif "_rebuild" in request.POST:
                 required_permission = "obpages.rebuild_search_index"
                 action = "rebuild_index"
+                args = ["--noinput"]
                 success_message = "Rebuilt Index!"
             else:
                 raise SuspiciousOperation
@@ -53,7 +55,7 @@ class SearchIndexAdmin(admin.ModelAdmin):
             if not request.user.has_perm(required_permission):
                 raise PermissionDenied
             try:
-                call_command(action, "--noinput")
+                call_command(action, *args)
             except ElasticsearchException as e:
                 self.message_user(
                     request,
