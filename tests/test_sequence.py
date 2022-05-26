@@ -1,12 +1,11 @@
 import datetime
 
 import pytest
-from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from obapi.models import AudioContentItem, TextContentItem, VideoContentItem
 
-from obpages.models import UserSequence
+from obpages.models import User, UserSequence
 from obpages.utils import to_slug
 
 SEQUENCE_SLUG_MAX_LENGTH = 150  # temporary patch

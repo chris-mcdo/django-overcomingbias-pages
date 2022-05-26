@@ -23,6 +23,12 @@ SPOTIFY_CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
 SPOTIFY_CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
 
 
+# Custom User model
+# https://docs.djangoproject.com/en/4.0/topics/auth/customizing/#substituting-a-custom-user-model
+
+AUTH_USER_MODEL = "obpages.User"
+
+
 # Debug mode
 DEBUG = False
 
