@@ -1,5 +1,5 @@
 from django import template
-from obapi.models import Author, ContentItem, Idea, Sequence, Tag, Topic
+from obapi.models import Author, BaseSequence, ContentItem, Idea, Tag, Topic
 
 register = template.Library()
 
@@ -21,7 +21,7 @@ def is_classifier(value):
 
 @register.filter
 def is_sequence(value):
-    return isinstance(value, Sequence)
+    return isinstance(value, BaseSequence)
 
 
 @register.filter

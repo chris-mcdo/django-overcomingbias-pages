@@ -8,8 +8,9 @@ from django.urls import path
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect
 from elasticsearch import ElasticsearchException
+from ordered_model.admin import OrderedInlineModelAdminMixin, OrderedTabularInline
 
-from obpages.models import SearchIndex, User
+from obpages.models import SearchIndex, User, UserSequence, UserSequenceMember
 
 admin.site.register(User, UserAdmin)
 
@@ -83,3 +84,26 @@ class SearchIndexAdmin(admin.ModelAdmin):
             return HttpResponseRedirect(request.get_full_path())
 
         return TemplateResponse(request, self.manage_search_template, context)
+
+
+class UserSequenceMemberInline(OrderedTabularInline):
+    model = UserSequenceMember
+    fields = (
+        "content_item",
+        "order",
+        "move_up_down_links",
+    )
+    readonly_fields = (
+        "order",
+        "move_up_down_links",
+    )
+    ordering = ("order",)
+    extra = 1
+    autocomplete_fields = ("content_item",)
+
+
+@admin.register(UserSequence)
+class UserSequenceAdmin(OrderedInlineModelAdminMixin, admin.ModelAdmin):
+    model = UserSequence
+    list_display = ("title",)
+    inlines = (UserSequenceMemberInline,)

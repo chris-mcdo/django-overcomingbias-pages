@@ -24,16 +24,15 @@ from django.views.generic import (
 from django.views.generic.edit import FormMixin
 from haystack.generic_views import SearchView
 from haystack.query import EmptySearchQuerySet
-from obapi.models import Sequence, SequenceMember
 
 from obpages.forms import (
     DefaultSearchForm,
     ExportSequenceForm,
     SequenceChangeForm,
-    SequenceMemberAddForm,
+    UserSequenceMemberAddForm,
     SequenceMemberMoveForm,
 )
-from obpages.models import User
+from obpages.models import UserSequence, UserSequenceMember, User
 
 OBPAGES_PAGES_PATH = "obpages"
 
@@ -78,7 +77,7 @@ def content_detail(request, item_source, item_id):
                     f"{item_type}_sequence_add",
                     kwargs={"item_source": item_source, "item_id": item_id},
                 ),
-                "sequencemember_add_form": SequenceMemberAddForm(user=request.user),
+                "sequencemember_add_form": UserSequenceMemberAddForm(user=request.user),
             }
         )
     return render(request, f"{OBPAGES_PAGES_PATH}/content_detail.html", context)
@@ -90,8 +89,8 @@ def sequence_add_view(request, item_source, item_id):
     item_model = apps.get_model("obapi", f"{item_source}contentitem")
     content_item = get_object_or_404(item_model, item_id=item_id)
 
-    initial_member = SequenceMember(content_item=content_item)
-    form = SequenceMemberAddForm(
+    initial_member = UserSequenceMember(content_item=content_item)
+    form = UserSequenceMemberAddForm(
         user=request.user, data=request.POST, instance=initial_member
     )
     if form.is_valid():
@@ -148,9 +147,9 @@ class ExploreListView(ListView):
 def sequence_curated(request):
     context = {
         "title": "Curated Sequences",
-        "intro_sequences": Sequence.objects.filter(public=True),
-        "popular_sequences": Sequence.objects.filter(public=True),
-        "recent_sequences": Sequence.objects.filter(public=True),
+        "intro_sequences": UserSequence.objects.filter(public=True),
+        "popular_sequences": UserSequence.objects.filter(public=True),
+        "recent_sequences": UserSequence.objects.filter(public=True),
         "max_results": RESULTS_PER_SECTION,
     }
     return render(request, f"{OBPAGES_PAGES_PATH}/sequence_curated.html", context)
@@ -158,7 +157,7 @@ def sequence_curated(request):
 
 class CreateSequenceView(LoginRequiredMixin, CreateView):
     template_name = f"{OBPAGES_PAGES_PATH}/sequence_create.html"
-    model = Sequence
+    model = UserSequence
     fields = ("title", "abstract", "public")
     extra_context = {"title": "Create Sequence"}
 
@@ -183,7 +182,7 @@ class CreateSequenceView(LoginRequiredMixin, CreateView):
 class SequenceListView(ListView):
     template_name = f"{OBPAGES_PAGES_PATH}/sequence_list.html"
     paginate_by = RESULTS_PER_PAGE
-    model = Sequence
+    model = UserSequence
     context_object_name = "sequences"
 
     def get_queryset(self):
@@ -222,7 +221,7 @@ class SequenceDetailView(DetailView):
 
         # Get sequences for user
         owner_slug = self.kwargs.get("user_slug")
-        all_sequences = Sequence.objects.filter(owner__slug=owner_slug)
+        all_sequences = UserSequence.objects.filter(owner__slug=owner_slug)
 
         # If current user is owner, display all sequences
         if self.request.user.is_authenticated and self.request.user.slug == owner_slug:
@@ -248,7 +247,9 @@ class SequenceDetailView(DetailView):
 @require_GET
 def sequence_export_view(request, user_slug, sequence_slug):
     # Get object or 404
-    sequence = get_object_or_404(Sequence, owner__slug=user_slug, slug=sequence_slug)
+    sequence = get_object_or_404(
+        UserSequence, owner__slug=user_slug, slug=sequence_slug
+    )
 
     # Check user is authorised to access the Sequence
     if not sequence.public and sequence.owner != request.user:
@@ -274,7 +275,7 @@ def sequence_export_view(request, user_slug, sequence_slug):
 
 class SequenceEditView(UpdateView):
     template_name = f"{OBPAGES_PAGES_PATH}/sequence_edit.html"
-    model = Sequence
+    model = UserSequence
     form_class = SequenceChangeForm
     context_object_name = "sequence"
     extra_context = {"title": "Edit Sequence"}
@@ -322,7 +323,7 @@ class SequenceEditView(UpdateView):
 
 class SequenceDeleteView(DeleteView):
     template_name = f"{OBPAGES_PAGES_PATH}/sequence_delete.html"
-    model = Sequence
+    model = UserSequence
     template_name_field = "sequence"
     extra_context = {"title": "Delete Sequence"}
 
@@ -356,7 +357,7 @@ class SequenceMemberMoveView(FormMixin, View):
             return self.object
         else:
             return get_object_or_404(
-                SequenceMember,
+                UserSequenceMember,
                 sequence__owner__slug=self.kwargs.get("user_slug"),
                 sequence__slug=self.kwargs.get("sequence_slug"),
                 order=self.kwargs.get("order"),
@@ -399,7 +400,7 @@ class SequenceMemberMoveView(FormMixin, View):
 @require_POST
 def sequencemember_delete_view(request, user_slug, sequence_slug, order):
     sequence_member = get_object_or_404(
-        SequenceMember,
+        UserSequenceMember,
         sequence__owner__slug=user_slug,
         sequence__slug=sequence_slug,
         order=order,

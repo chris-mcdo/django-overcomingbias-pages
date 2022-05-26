@@ -6,8 +6,6 @@ from obapi.models import (
     Author,
     Idea,
     OBContentItem,
-    Sequence,
-    SequenceMember,
     SpotifyContentItem,
     Topic,
     YoutubeContentItem,
@@ -18,6 +16,7 @@ from obpages.fields import (
     ContentMultipleChoiceField,
     SortOptionsField,
 )
+from obpages.models import UserSequence, UserSequenceMember
 
 
 class DefaultSearchForm(forms.Form):
@@ -171,7 +170,7 @@ class SequenceChangeForm(forms.ModelForm):
         self.fields["abstract"].widget.attrs.pop("cols")
 
     class Meta:
-        model = Sequence
+        model = UserSequence
         fields = ("title", "abstract", "public")
 
     def _get_validation_exclusions(self):
@@ -192,11 +191,11 @@ class SequenceMemberMoveForm(forms.Form):
     move = forms.ChoiceField(choices=SEQUENCEMEMBER_MOVE_CHOICES)
 
 
-class SequenceMemberAddForm(forms.ModelForm):
+class UserSequenceMemberAddForm(forms.ModelForm):
     def __init__(self, user, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["sequence"].queryset = user.sequences.all()
 
     class Meta:
-        model = SequenceMember
+        model = UserSequenceMember
         fields = ("sequence",)

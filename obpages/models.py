@@ -1,7 +1,9 @@
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.urls import reverse
 from obapi.modelfields import SimpleSlugField
+from obapi.models import BaseSequence, BaseSequenceMember, ContentItem
 
 from obpages.utils import to_slug
 
@@ -40,3 +42,39 @@ class SearchIndex(models.Model):
             ("rebuild_search_index", "Can rebuild the search index"),
         )
         verbose_name_plural = "Search Indexes"
+
+
+class UserSequence(BaseSequence):
+    items = models.ManyToManyField(ContentItem, through="UserSequenceMember")
+
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        editable=False,
+        related_name="sequences",
+    )
+    public = models.BooleanField(
+        default=False, help_text="Whether the sequence is public or private."
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["owner", "slug"], name="unique_usersequence_slug"
+            )
+        ]
+
+
+class UserSequenceMember(BaseSequenceMember):
+    sequence = models.ForeignKey(
+        UserSequence,
+        on_delete=models.CASCADE,
+        related_name="members",
+        related_query_name="members",
+    )
+    content_item = models.ForeignKey(
+        ContentItem,
+        on_delete=models.CASCADE,
+        related_name="user_sequence_members",
+        related_query_name="user_sequence_members",
+    )
