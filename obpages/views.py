@@ -4,6 +4,7 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
+from django.db.models import Count
 from django.http import (
     Http404,
     HttpResponse,
@@ -29,10 +30,10 @@ from obpages.forms import (
     DefaultSearchForm,
     ExportSequenceForm,
     SequenceChangeForm,
-    UserSequenceMemberAddForm,
     SequenceMemberMoveForm,
+    UserSequenceMemberAddForm,
 )
-from obpages.models import UserSequence, UserSequenceMember, User
+from obpages.models import User, UserSequence, UserSequenceMember
 
 OBPAGES_PAGES_PATH = "obpages"
 
@@ -135,6 +136,17 @@ class ExploreListView(ListView):
     def get(self, request, model_name):
         self.model = apps.get_model("obapi", model_name)
         return super().get(request)
+
+    def get_queryset(self):
+        """Return the list of items for this view."""
+        # Initial queryset
+        queryset = self.model._default_manager.all()
+        # Sort by item counts
+        queryset = queryset.annotate(item_count=Count("content")).order_by(
+            "-item_count"
+        )
+
+        return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
