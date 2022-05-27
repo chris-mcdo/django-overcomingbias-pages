@@ -17,7 +17,7 @@ from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.debug import sensitive_post_parameters
 from django.views.generic import CreateView, TemplateView
 
-from obpages.accounts.forms import RegisterForm
+from obpages.accounts.forms import CustomPasswordResetForm, RegisterForm
 
 OBPAGES_AUTH_TEMPLATES_PATH = "obpages/accounts"
 
@@ -86,6 +86,7 @@ class CustomPasswordChangeDoneView(PasswordChangeDoneView):
 
 class CustomPasswordResetView(PasswordResetView):
     template_name = f"{OBPAGES_AUTH_TEMPLATES_PATH}/password_reset_form.html"
+    form_class = CustomPasswordResetForm
 
 
 class CustomPasswordResetDoneView(PasswordResetDoneView):

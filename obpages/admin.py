@@ -1,15 +1,14 @@
 from django.contrib import admin, messages
 from django.contrib.auth.admin import UserAdmin
 from django.core.exceptions import PermissionDenied, SuspiciousOperation
-from django.core.management import call_command
 from django.http import HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import path
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect
-from elasticsearch import ElasticsearchException
 from ordered_model.admin import OrderedInlineModelAdminMixin, OrderedTabularInline
 
+import obpages.tasks
 from obpages.models import SearchIndex, User, UserSequence, UserSequenceMember
 
 admin.site.register(User, UserAdmin)
@@ -41,32 +40,22 @@ class SearchIndexAdmin(admin.ModelAdmin):
             # Configure action
             if "_update" in request.POST:
                 required_permission = "obpages.update_search_index"
-                action = "update_index"
-                args = ["--remove"]
-                success_message = "Updated Index!"
+                searchindex_task = obpages.tasks.update_search_index
+                success_message = "Updating search index. This may take a while..."
             elif "_rebuild" in request.POST:
                 required_permission = "obpages.rebuild_search_index"
-                action = "rebuild_index"
-                args = ["--noinput"]
-                success_message = "Rebuilt Index!"
+                searchindex_task = obpages.tasks.rebuild_search_index
+                success_message = "Rebuilding search index. This may take a while..."
             else:
                 raise SuspiciousOperation
 
             # Execute action
             if not request.user.has_perm(required_permission):
                 raise PermissionDenied
-            try:
-                call_command(action, *args)
-            except ElasticsearchException as e:
-                self.message_user(
-                    request,
-                    message="Elastic search exception %s" % e,
-                    level=messages.ERROR,
-                )
-            else:
-                self.message_user(
-                    request, message=success_message, level=messages.SUCCESS
-                )
+
+            # Run task
+            searchindex_task()
+            self.message_user(request, message=success_message, level=messages.INFO)
 
         context = {
             **self.admin_site.each_context(request),
