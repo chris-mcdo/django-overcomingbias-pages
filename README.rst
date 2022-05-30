@@ -28,6 +28,8 @@ To configure ``django-overcomingbias-pages``, add the following to your settings
 
 .. code-block:: python
 
+  # settings.py
+
   # add required apps
   INSTALLED_APPS = [
     # required for admin site / user accounts
@@ -43,6 +45,8 @@ To configure ``django-overcomingbias-pages``, add the following to your settings
     "obapi",
     # haystack search
     "haystack",
+    # async tasks
+    "huey.contrib.djhuey",
     # django-overcomingbias-pages
     "obpages",
   ]
@@ -58,6 +62,8 @@ If you don't care about search, just add this to your settings:
 
 .. code-block:: python
 
+  # settings.py
+
   # dummy backend for django-haystack
   HAYSTACK_CONNECTIONS = {
     "default": {
@@ -65,6 +71,38 @@ If you don't care about search, just add this to your settings:
     },
   }
 
+``django-overcomingbias-pages`` uses `Huey <https://github.com/coleifer/huey>`_ to
+run tasks asynchronously.
+To enable this feature, follow the
+`Django/Huey instructions <https://huey.readthedocs.io/en/latest/django.html>`_.
+A minimal configuration is shown below:
+
+.. code-block:: python
+
+  # settings.py
+
+  connection_pool = ConnectionPool(host="127.0.0.1", port=6379, db=0, max_connections=100)
+
+  # See docs for full list of settings
+  HUEY = {
+      "huey_class": "huey.PriorityRedisHuey",
+      "name": PROJECT_NAME,
+      "connection": {
+          "connection_pool": connection_pool,
+          # see redis-py for more options
+          # https://redis-py.readthedocs.io/en/latest/connections.html
+          "read_timeout": 0,
+      },
+      "consumer": {
+          "workers": 4,
+          "worker_type": "thread",
+      },
+  }
+
+(Note that this requires a Redis server running on localhost:6379.)
+
+Optionally, you can also configure Huey as your
+`email backend <https://github.com/chris-mcdo/django-huey-email-backend>`_.
 
 Bugs/Requests
 -------------
