@@ -6,6 +6,8 @@ from django.template.response import TemplateResponse
 from django.urls import path
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect
+from obapi.admin import OBContentItemAdmin
+from obapi.models import OBContentItem
 from ordered_model.admin import OrderedInlineModelAdminMixin, OrderedTabularInline
 
 import obpages.tasks
@@ -96,3 +98,32 @@ class UserSequenceAdmin(OrderedInlineModelAdminMixin, admin.ModelAdmin):
     model = UserSequence
     list_display = ("title",)
     inlines = (UserSequenceMemberInline,)
+
+
+# Override obapi content item admin
+admin.site.unregister(OBContentItem)
+
+
+@admin.register(OBContentItem)
+class OBContentItemAdmin(OBContentItemAdmin):
+    """OBContentItemAdmin which uses Huey to pull and sync posts asynchronously."""
+
+    def pull(self, request):
+        # Dispatch task
+        obpages.tasks.download_new_items(user_pk=request.user.pk)
+        # Message user
+        self.message_user(
+            request=request,
+            message="Downloading new posts. Please wait up to 30 minutes.",
+            level=messages.INFO,
+        )
+
+    def sync(self, request):
+        # Dispatch task
+        obpages.tasks.update_edited_items(user_pk=request.user.pk)
+        # Message user
+        self.message_user(
+            request=request,
+            message="Updating existing posts. Please wait a few minutes.",
+            level=messages.INFO,
+        )
