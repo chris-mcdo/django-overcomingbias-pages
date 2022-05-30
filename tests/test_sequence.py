@@ -44,7 +44,7 @@ class TestCreateUserSequence:
 
     def test_can_create_normal_sequence(self, james, alice):
         # Arrange
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=datetime.timezone.utc)
         video = VideoContentItem.objects.create(title="Video Item", publish_date=now)
         audio = AudioContentItem.objects.create(title="Audio Item", publish_date=now)
         text = TextContentItem.objects.create(title="Text Item", publish_date=now)
