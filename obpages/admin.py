@@ -105,7 +105,7 @@ admin.site.unregister(OBContentItem)
 
 
 @admin.register(OBContentItem)
-class OBContentItemAdmin(OBContentItemAdmin):
+class CustomOBContentItemAdmin(OBContentItemAdmin):
     """OBContentItemAdmin which uses Huey to pull and sync posts asynchronously."""
 
     def pull(self, request):
