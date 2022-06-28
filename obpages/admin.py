@@ -110,7 +110,7 @@ class OBContentItemAdmin(OBContentItemAdmin):
 
     def pull(self, request):
         # Dispatch task
-        obpages.tasks.download_new_items(user_pk=request.user.pk)
+        obpages.tasks.download_new_items()
         # Message user
         self.message_user(
             request=request,
