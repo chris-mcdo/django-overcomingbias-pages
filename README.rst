@@ -99,7 +99,8 @@ A minimal configuration is shown below:
       },
   }
 
-(Note that this requires a Redis server running on localhost:6379.)
+(Note that this requires (1) a Redis server running on localhost:6379 and (2) installing
+via ``pip install django-overcomingbias-pages[redis]``.)
 
 Optionally, you can also configure Huey as your
 `email backend <https://github.com/chris-mcdo/django-huey-email-backend>`_.
