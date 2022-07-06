@@ -97,6 +97,7 @@ nav > ul {
 
 nav li {
   flex: 1 1 auto;
+  padding: 6px;
 }
 
 nav .nav-current {
@@ -115,6 +116,25 @@ nav input {
   border: 1px solid var(--border-primary);
   padding: 0 0.5rem;
   width: calc(100% - 4em);
+}
+
+nav a {
+  text-decoration: none;
+}
+
+nav svg {
+  height: 2em;
+  fill: var(--text-link);
+  display: none;
+}
+
+@media only screen and (max-width: 500px) {
+  .main-navigation svg {
+    display: initial;
+  }
+  .main-navigation a + a {
+    display: none;
+  }
 }
 
 /* Footer */
@@ -151,7 +171,7 @@ main form {
   flex-direction: column;
   border: 1px solid var(--border-primary);
   padding: 0.5em;
-  max-width: 500px;
+  max-width: min(500px, 80vw);
   margin: 1.5em auto;
   align-content: start;
 }
@@ -291,7 +311,6 @@ main > header > ul > li + * {
 
 .search-filters {
   display: flex;
-  flex-wrap: wrap;
   flex-direction: column;
   gap: 1em;
 }
