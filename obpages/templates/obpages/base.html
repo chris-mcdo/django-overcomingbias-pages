@@ -8,12 +8,12 @@
         {% comment %} Mobile support {% endcomment %}
         <meta name="viewport" content="width=device-width, initial-scale=1">
         {% comment %} Title, author, description {% endcomment %}
-        <title>{% block title %}{{ title }} | OBWiki{% endblock %}</title>
+        <title>{% block title %}{{ title }} | OBCollection{% endblock %}</title>
         <meta name="author" content="Chris McDonald">
         <meta name="description" content="A collection of Robin Hanson's content.">
         {% comment %} Open Graph metadata (Facebook) {% endcomment %}
         <meta property="og:url" content="{{ request.build_absolute_uri }}">
-        <meta property="og:title" content="{{ title }} | OBWiki">
+        <meta property="og:title" content="{{ title }} | OBCollection">
         <meta property="og:description" content="A collection of Robin Hanson's content.">
         <meta property="og:locale" content="en-US">
         <meta property="og:image" content="{% static "obpages/social-link-image.svg" %}">
