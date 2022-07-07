@@ -2,18 +2,14 @@ from django import forms
 from django.core.exceptions import ValidationError
 from haystack.query import SQ, AutoQuery, SearchQuerySet
 from obapi.formfields import PandocWriterField
-from obapi.models import (
+from obapi.models import (  # OBContentItem, SpotifyContentItem, YoutubeContentItem,
     Author,
     Idea,
-    OBContentItem,
-    SpotifyContentItem,
     Topic,
-    YoutubeContentItem,
 )
 
-from obpages.fields import (
+from obpages.fields import (  # ContentMultipleChoiceField,
     ClassifierMultipleChoiceField,
-    ContentMultipleChoiceField,
     SortOptionsField,
 )
 from obpages.models import UserSequence, UserSequenceMember
@@ -39,29 +35,29 @@ class DefaultSearchForm(forms.Form):
     authors = ClassifierMultipleChoiceField(Author)
     ideas = ClassifierMultipleChoiceField(Idea)
     topics = ClassifierMultipleChoiceField(Topic)
-    start_date = forms.DateTimeField(
-        required=False,
-        label="Start Date",
-        widget=forms.DateInput(attrs={"type": "date"}),
-    )
-    end_date = forms.DateTimeField(
-        required=False,
-        label="End Date",
-        widget=forms.DateInput(attrs={"type": "date"}),
-    )
-    content_type = ContentMultipleChoiceField(
-        models=(SpotifyContentItem, YoutubeContentItem, OBContentItem),
-        required=False,
-        label="Content Type",
-    )
-    min_word_count = forms.IntegerField(
-        label="Minimum Word Count", required=False, min_value=0, max_value=10000
-    )
-    max_word_count = forms.IntegerField(
-        label="Maximum Word Count", required=False, min_value=0, max_value=10000
-    )
-    min_duration = forms.DurationField(label="Minimum Duration", required=False)
-    max_duration = forms.DurationField(label="Maximum Duration", required=False)
+    # start_date = forms.DateTimeField(
+    #     required=False,
+    #     label="Start Date",
+    #     widget=forms.DateInput(attrs={"type": "date"}),
+    # )
+    # end_date = forms.DateTimeField(
+    #     required=False,
+    #     label="End Date",
+    #     widget=forms.DateInput(attrs={"type": "date"}),
+    # )
+    # content_type = ContentMultipleChoiceField(
+    #     models=(SpotifyContentItem, YoutubeContentItem, OBContentItem),
+    #     required=False,
+    #     label="Content Type",
+    # )
+    # min_word_count = forms.IntegerField(
+    #     label="Minimum Word Count", required=False, min_value=0, max_value=10000
+    # )
+    # max_word_count = forms.IntegerField(
+    #     label="Maximum Word Count", required=False, min_value=0, max_value=10000
+    # )
+    # min_duration = forms.DurationField(label="Minimum Duration", required=False)
+    # max_duration = forms.DurationField(label="Maximum Duration", required=False)
 
     def __init__(self, *args, **kwargs):
         self.searchqueryset = kwargs.pop("searchqueryset", None)
@@ -93,26 +89,26 @@ class DefaultSearchForm(forms.Form):
         if topics := self.cleaned_data.get("topics"):
             sqs = sqs.filter(topics__in=topics)
 
-        if start_date := self.cleaned_data.get("start_date"):
-            sqs = sqs.filter(publish_date__gte=start_date)
+        # if start_date := self.cleaned_data.get("start_date"):
+        #     sqs = sqs.filter(publish_date__gte=start_date)
 
-        if end_date := self.cleaned_data.get("end_date"):
-            sqs = sqs.filter(publish_date__lte=end_date)
+        # if end_date := self.cleaned_data.get("end_date"):
+        #     sqs = sqs.filter(publish_date__lte=end_date)
 
-        if content_type := self.cleaned_data.get("content_type"):
-            sqs = sqs.filter(django_ct__in=content_type)
+        # if content_type := self.cleaned_data.get("content_type"):
+        #     sqs = sqs.filter(django_ct__in=content_type)
 
-        if min_word_count := self.cleaned_data.get("min_word_count"):
-            sqs = sqs.filter(word_count__gte=min_word_count)
+        # if min_word_count := self.cleaned_data.get("min_word_count"):
+        #     sqs = sqs.filter(word_count__gte=min_word_count)
 
-        if max_word_count := self.cleaned_data.get("max_word_count"):
-            sqs = sqs.filter(word_count__lte=max_word_count)
+        # if max_word_count := self.cleaned_data.get("max_word_count"):
+        #     sqs = sqs.filter(word_count__lte=max_word_count)
 
-        if min_duration := self.cleaned_data.get("min_duration"):
-            sqs = sqs.filter(duration__gte=min_duration.total_seconds())
+        # if min_duration := self.cleaned_data.get("min_duration"):
+        #     sqs = sqs.filter(duration__gte=min_duration.total_seconds())
 
-        if max_duration := self.cleaned_data.get("max_duration"):
-            sqs = sqs.filter(duration__lte=max_duration.total_seconds())
+        # if max_duration := self.cleaned_data.get("max_duration"):
+        #     sqs = sqs.filter(duration__lte=max_duration.total_seconds())
 
         if self.load_all:
             sqs = sqs.load_all()
@@ -126,24 +122,24 @@ class DefaultSearchForm(forms.Form):
         cleaned_data = super().clean()
 
         # Date range
-        self.validate_range(
-            cleaned_data,
-            "start_date",
-            "end_date",
-            message="End date must be after start date.",
-        )
-        self.validate_range(
-            cleaned_data,
-            "min_word_count",
-            "max_word_count",
-            message="Minimum word count must be less than maximum word count.",
-        )
-        self.validate_range(
-            cleaned_data,
-            "min_duration",
-            "max_duration",
-            message="Minimum duration must be less than maximum duration.",
-        )
+        # self.validate_range(
+        #     cleaned_data,
+        #     "start_date",
+        #     "end_date",
+        #     message="End date must be after start date.",
+        # )
+        # self.validate_range(
+        #     cleaned_data,
+        #     "min_word_count",
+        #     "max_word_count",
+        #     message="Minimum word count must be less than maximum word count.",
+        # )
+        # self.validate_range(
+        #     cleaned_data,
+        #     "min_duration",
+        #     "max_duration",
+        #     message="Minimum duration must be less than maximum duration.",
+        # )
 
         return cleaned_data
 
