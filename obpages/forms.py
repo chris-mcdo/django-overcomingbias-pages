@@ -1,5 +1,7 @@
+import django_select2.forms
 from django import forms
 from django.core.exceptions import ValidationError
+from django.utils.html import format_html
 from haystack.query import SQ, AutoQuery, SearchQuerySet
 from obapi.formfields import PandocWriterField
 from obapi.models import (  # OBContentItem, SpotifyContentItem, YoutubeContentItem,
@@ -15,11 +17,21 @@ from obpages.fields import (  # ContentMultipleChoiceField,
 from obpages.models import UserSequence, UserSequenceMember
 
 
+def render_js(self):
+    return [
+        format_html('<script src="{}" defer></script>', self.absolute_path(path))
+        for path in self._js
+    ]
+
+
+forms.widgets.Media.render_js = render_js
+
+
 class DefaultSearchForm(forms.Form):
     query = forms.CharField(
         required=False,
         label="Search",
-        widget=forms.HiddenInput(),
+        widget=forms.HiddenInput,
     )
 
     sort = SortOptionsField(
@@ -32,9 +44,15 @@ class DefaultSearchForm(forms.Form):
         label="Sort By",
         widget=forms.Select(attrs={"onchange": "this.form.submit()"}),
     )
-    authors = ClassifierMultipleChoiceField(Author)
-    ideas = ClassifierMultipleChoiceField(Idea)
-    topics = ClassifierMultipleChoiceField(Topic)
+    authors = ClassifierMultipleChoiceField(
+        Author, widget=django_select2.forms.Select2MultipleWidget
+    )
+    ideas = ClassifierMultipleChoiceField(
+        Idea, widget=django_select2.forms.Select2MultipleWidget
+    )
+    topics = ClassifierMultipleChoiceField(
+        Topic, widget=django_select2.forms.Select2MultipleWidget
+    )
     # start_date = forms.DateTimeField(
     #     required=False,
     #     label="Start Date",

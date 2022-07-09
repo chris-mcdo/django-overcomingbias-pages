@@ -1,6 +1,17 @@
 {% extends "obpages/base.html" %}
 {% load static sections widgets %}
 
+{% block style_extra %}
+    {{ block.super }}
+    {{ form.media.css }}
+{% endblock %}
+
+{% block script_extra %}
+    {{ block.super }}
+    <script src="{% static "admin/js/vendor/jquery/jquery.min.js" %}" defer></script>
+    {{ form.media.js }}
+{% endblock %}
+
 {% block content %}
     {% block sort_options %}
         <details>

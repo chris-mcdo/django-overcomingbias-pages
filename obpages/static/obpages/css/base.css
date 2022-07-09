@@ -204,6 +204,10 @@ main form input[type="submit"] {
   justify-self: center;
 }
 
+.select2-container * {
+  margin-top: 0;
+}
+
 /* Headers in main body */
 
 main > header > ul {
@@ -320,10 +324,6 @@ main > header > ul > li + * {
 
 .search-filters * {
   margin-top: 0;
-}
-
-.search-filters > select {
-  margin-left: 1em;
 }
 
 /* Sequence member move form */

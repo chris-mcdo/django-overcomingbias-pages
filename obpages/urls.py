@@ -9,6 +9,8 @@ register_converter(converters.OBPostNameConverter, "ob_name")
 register_converter(converters.EssayIDConverter, "essay_id")
 register_converter(converters.ClassifierNameConverter, "classifier")
 urlpatterns = [
+    # select2 widgets
+    path("select2/", include("django_select2.urls")),
     # Search
     path("", RedirectView.as_view(pattern_name="search", permanent=True)),
     path("search", views.SearchContentView.as_view(), name="search"),
