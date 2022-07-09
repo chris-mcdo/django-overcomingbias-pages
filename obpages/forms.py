@@ -79,6 +79,8 @@ class DefaultSearchForm(forms.Form):
 
         if order_field := self.cleaned_data.get("sort"):
             sqs = sqs.order_by(order_field)
+        elif query is None:
+            sqs = sqs.order_by("-publish_date")
 
         if authors := self.cleaned_data.get("authors"):
             sqs = sqs.filter(authors__in=authors)
