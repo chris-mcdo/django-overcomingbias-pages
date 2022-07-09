@@ -6,6 +6,7 @@ from . import converters, views
 register_converter(converters.YoutubeVideoIDConverter, "youtube_id")
 register_converter(converters.SpotifyEpisodeIDConverter, "spotify_id")
 register_converter(converters.OBPostNameConverter, "ob_name")
+register_converter(converters.EssayIDConverter, "essay_id")
 register_converter(converters.ClassifierNameConverter, "classifier")
 urlpatterns = [
     # Search
@@ -33,6 +34,12 @@ urlpatterns = [
         name="obcontentitem_detail",
     ),
     path(
+        "content/essays/<essay_id:item_id>",
+        views.content_detail,
+        {"item_source": "essay"},
+        name="essaycontentitem_detail",
+    ),
+    path(
         "content/youtube/<youtube_id:item_id>/sequences/add",
         views.sequence_add_view,
         {"item_source": "youtube"},
@@ -49,6 +56,12 @@ urlpatterns = [
         views.sequence_add_view,
         {"item_source": "ob"},
         name="obcontentitem_sequence_add",
+    ),
+    path(
+        "content/essays/<essay_id:item_id>/sequences/add",
+        views.sequence_add_view,
+        {"item_source": "essay"},
+        name="essaycontentitem_sequence_add",
     ),
     # Explore
     path("explore", views.explore_base, name="explore_base"),

@@ -1,7 +1,12 @@
 import datetime
 
 from haystack import indexes
-from obapi.models import OBContentItem, SpotifyContentItem, YoutubeContentItem
+from obapi.models import (
+    EssayContentItem,
+    OBContentItem,
+    SpotifyContentItem,
+    YoutubeContentItem,
+)
 
 INDEX_TEMPLATES_PATH = "obpages/indexes"
 
@@ -70,3 +75,13 @@ class YoutubeContentItemIndex(ContentItemIndex, indexes.Indexable):
 
     def get_model(self):
         return YoutubeContentItem
+
+
+class EssayContentItemIndex(ContentItemIndex, indexes.Indexable):
+
+    word_count = indexes.IntegerField(
+        model_attr="word_count", stored=True, indexed=False
+    )
+
+    def get_model(self):
+        return EssayContentItem
