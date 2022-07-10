@@ -8,6 +8,7 @@
 /* variables ------------------------------------------------------------------------ */
 [data-user-theme="light"] {
   --text-primary: black;
+  --text-secondary: dimgrey;
   --text-link: #00a;
   --background-primary: #ccc;
   --background-content: #fff;
@@ -206,6 +207,16 @@ main form h1 {
 
 main form input[type="submit"] {
   justify-self: center;
+}
+
+main form br {
+  display: none;
+}
+
+.helptext {
+  margin-top: 0;
+  color: var(--text-secondary);
+  font-size: 75%;
 }
 
 .select2-container * {
