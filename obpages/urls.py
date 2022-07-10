@@ -1,5 +1,4 @@
 from django.urls import include, path, register_converter
-from django.views.generic import RedirectView
 
 from . import converters, views
 
@@ -12,7 +11,7 @@ urlpatterns = [
     # select2 widgets
     path("select2/", include("django_select2.urls")),
     # Search
-    path("", RedirectView.as_view(pattern_name="search", permanent=True)),
+    path("", views.home, name="home"),
     path("search", views.SearchContentView.as_view(), name="search"),
     # Account
     path("", include("obpages.accounts.urls")),

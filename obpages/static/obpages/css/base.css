@@ -222,6 +222,38 @@ main > header > ul > li + * {
   margin-top: 0;
 }
 
+
+/* Text in main body */
+
+section > p {
+  margin-top: 1.5em;
+}
+
+/* Lists and menus in main body */
+
+section > ul {
+  display: block;
+  list-style: inside;
+}
+
+section > menu {
+  display: block;
+  list-style: inside;
+}
+
+section > menu > li {
+  margin-top: 0;
+}
+
+section > ul > li {
+  margin-top: 0;
+}
+
+p + ul {
+  margin-top: 1.5em;
+  margin-left: 1.5em;
+}
+
 /* External link icon */
 
 .item-link * {

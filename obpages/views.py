@@ -25,6 +25,7 @@ from django.views.generic import (
 from django.views.generic.edit import FormMixin
 from haystack.generic_views import SearchView
 from haystack.query import EmptySearchQuerySet
+from obapi.models import EssayContentItem, OBContentItem, YoutubeContentItem
 
 from obpages.forms import (
     DefaultSearchForm,
@@ -39,6 +40,51 @@ OBPAGES_PAGES_PATH = "obpages"
 
 RESULTS_PER_PAGE = getattr(settings, "OBPAGES_RESULTS_PER_PAGE", 20)
 RESULTS_PER_SECTION = getattr(settings, "OBPAGES_RESULTS_PER_SECTION", 5)
+
+
+@require_GET
+def home(request):
+    # TODO: put this data in the database
+    curated_obcontentitem_ids = [
+        "2017/02/neglected-big-problems",
+        "2010/10/two-types-of-people",
+        "2011/07/making-up-opinions",
+        "2009/09/this-is-the-dream-time",
+        "2010/03/further-than-africa",
+        "2006/11/beware_heritabl",
+    ]
+    curated_essaycontentitem_ids = [
+        "futarchy",
+        "buyhealth",
+        "innocence",
+        "belieflikeclothes",
+        "wouldhavebanned",
+        "Lifeinsim",
+    ]
+    curated_youtubecontentitem_ids = [
+        "4yZKGbq1YmA",  # intro to prediction markets
+        "aspMV6ERqpo",  # great filter (TED)
+        # "izEUig9w1tM", # vouching (TED)
+        "l3whaviTqqg",  # grabby aliens animation
+        "eK5qxAA60PQ",  # age of em
+        "nIRvNxykvTQ",  # effective altruism
+        # "aagyRGKv66g", # Dwarkesh interview
+        "3tcYQE1B588",  # interview at Oxford
+    ]
+    context = {
+        "title": "Home",
+        "max_results": 6,
+        "curated_essaycontentitems": EssayContentItem.objects.filter(
+            item_id__in=curated_essaycontentitem_ids
+        ),
+        "curated_obcontentitems": OBContentItem.objects.filter(
+            item_id__in=curated_obcontentitem_ids
+        ),
+        "curated_youtubecontentitems": YoutubeContentItem.objects.filter(
+            item_id__in=curated_youtubecontentitem_ids
+        ),
+    }
+    return render(request, f"{OBPAGES_PAGES_PATH}/home.html", context)
 
 
 class SearchContentView(SearchView):
