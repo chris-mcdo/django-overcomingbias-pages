@@ -133,7 +133,7 @@ def feedback_done(request):
     return render(request, f"{OBPAGES_PAGES_PATH}/feedback_done.html", context)
 
 
-class SearchContentView(SearchView):
+class ContentSearchView(SearchView):
     template_name = f"{OBPAGES_PAGES_PATH}/search.html"
     form_class = DefaultSearchForm
     context_object_name = "search_results"
@@ -259,7 +259,7 @@ def sequence_curated(request):
     return render(request, f"{OBPAGES_PAGES_PATH}/sequence_curated.html", context)
 
 
-class CreateSequenceView(LoginRequiredMixin, CreateView):
+class SequenceCreateView(LoginRequiredMixin, CreateView):
     template_name = f"{OBPAGES_PAGES_PATH}/sequence_create.html"
     model = UserSequence
     fields = ("title", "abstract", "public")

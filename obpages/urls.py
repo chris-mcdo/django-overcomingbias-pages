@@ -15,7 +15,7 @@ urlpatterns = [
     path("about", views.about, name="about"),
     path("feedback", views.FeedbackView.as_view(), name="feedback"),
     path("feedback/done", views.feedback_done, name="feedback_done"),
-    path("search", views.SearchContentView.as_view(), name="search"),
+    path("search", views.ContentSearchView.as_view(), name="search"),
     # Account
     path("", include("obpages.accounts.urls")),
     # Content
@@ -82,7 +82,7 @@ urlpatterns = [
     # Sequences
     path("sequences", views.sequence_curated, name="sequence_curated"),
     path(
-        "sequences/create", views.CreateSequenceView.as_view(), name="sequence_create"
+        "sequences/create", views.SequenceCreateView.as_view(), name="sequence_create"
     ),
     # User pages
     path("users/<str:user_slug>", views.UserDetailView.as_view(), name="user_detail"),
