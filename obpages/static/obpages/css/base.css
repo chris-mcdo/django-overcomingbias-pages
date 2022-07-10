@@ -342,6 +342,18 @@ header + menu {
   margin-top: 0;
 }
 
+/* Sequencemember tiles */
+
+.tile-sequencemember > a {
+  grid-row: 1 / 2;
+  align-self: flex-start;
+}
+
+.tile-sequencemember > menu {
+  grid-column: 1 / 3;
+  align-self: flex-start;
+}
+
 /* More tiles */
 
 .tile-more {
