@@ -12,6 +12,7 @@ urlpatterns = [
     path("select2/", include("django_select2.urls")),
     # Search
     path("", views.home, name="home"),
+    path("about", views.about, name="about"),
     path("search", views.SearchContentView.as_view(), name="search"),
     # Account
     path("", include("obpages.accounts.urls")),

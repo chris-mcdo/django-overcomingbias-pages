@@ -87,6 +87,12 @@ def home(request):
     return render(request, f"{OBPAGES_PAGES_PATH}/home.html", context)
 
 
+@require_GET
+def about(request):
+    context = {"title": "About this site"}
+    return render(request, f"{OBPAGES_PAGES_PATH}/about.html", context)
+
+
 class SearchContentView(SearchView):
     template_name = f"{OBPAGES_PAGES_PATH}/search.html"
     form_class = DefaultSearchForm
