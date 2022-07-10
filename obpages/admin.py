@@ -11,9 +11,20 @@ from obapi.models import OBContentItem
 from ordered_model.admin import OrderedInlineModelAdminMixin, OrderedTabularInline
 
 import obpages.tasks
-from obpages.models import SearchIndex, User, UserSequence, UserSequenceMember
+from obpages.models import (
+    FeedbackNote,
+    SearchIndex,
+    User,
+    UserSequence,
+    UserSequenceMember,
+)
 
 admin.site.register(User, UserAdmin)
+
+
+@admin.register(FeedbackNote)
+class FeedbackNoteAdmin(admin.ModelAdmin):
+    readonly_fields = ("create_timestamp",)
 
 
 @admin.register(SearchIndex)

@@ -1,3 +1,5 @@
+import random
+
 import obapi.export
 from django.apps import apps
 from django.conf import settings
@@ -34,7 +36,7 @@ from obpages.forms import (
     SequenceMemberMoveForm,
     UserSequenceMemberAddForm,
 )
-from obpages.models import User, UserSequence, UserSequenceMember
+from obpages.models import FeedbackNote, User, UserSequence, UserSequenceMember
 
 OBPAGES_PAGES_PATH = "obpages"
 
@@ -91,6 +93,44 @@ def home(request):
 def about(request):
     context = {"title": "About this site"}
     return render(request, f"{OBPAGES_PAGES_PATH}/about.html", context)
+
+
+class FeedbackView(CreateView):
+    template_name = f"{OBPAGES_PAGES_PATH}/feedback.html"
+    model = FeedbackNote
+    fields = ("feedback",)
+    extra_context = {"title": "Feedback Form"}
+
+    def post(self, request):
+        if request.user.is_authenticated:
+            self.object = self.model(user=request.user)
+        form = self.get_form()
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class=form_class)
+        placeholders = [
+            "Everything sucks...",
+            "The UI is terrible...",
+            "The website is broken...",
+        ]
+        form.fields["feedback"].widget.attrs["placeholder"] = random.choice(
+            placeholders
+        )
+        return form
+
+    def get_success_url(self):
+        """Return the URL to redirect to after processing a valid form."""
+        return reverse("feedback_done")
+
+
+@require_GET
+def feedback_done(request):
+    context = {"title": "Feedback Submitted Successfully"}
+    return render(request, f"{OBPAGES_PAGES_PATH}/feedback_done.html", context)
 
 
 class SearchContentView(SearchView):

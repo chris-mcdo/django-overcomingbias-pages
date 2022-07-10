@@ -13,6 +13,8 @@ urlpatterns = [
     # Search
     path("", views.home, name="home"),
     path("about", views.about, name="about"),
+    path("feedback", views.FeedbackView.as_view(), name="feedback"),
+    path("feedback/done", views.feedback_done, name="feedback_done"),
     path("search", views.SearchContentView.as_view(), name="search"),
     # Account
     path("", include("obpages.accounts.urls")),

@@ -78,3 +78,28 @@ class UserSequenceMember(BaseSequenceMember):
         related_name="user_sequence_members",
         related_query_name="user_sequence_members",
     )
+
+
+class FeedbackNote(models.Model):
+    create_timestamp = models.DateTimeField(
+        auto_now_add=True, help_text="When the note was created."
+    )
+    feedback = models.TextField()  # what the note says
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name="feedback_notes",
+        help_text="Which user the feedback belongs to.",
+    )
+    no_further_action = models.BooleanField(
+        default=False, help_text="Whether the feedback requires further action."
+    )
+
+    def __str__(self):
+        if self.user:
+            username = self.user.username
+        else:
+            username = "Anonymous"
+        return f"{username} - {self.create_timestamp:%a %d %b, %H:%M}"
