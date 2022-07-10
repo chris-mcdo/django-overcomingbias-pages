@@ -185,6 +185,10 @@ main form * + * {
   margin-top: 1.5em;
 }
 
+main form input[type="hidden"] + label {
+  margin-top: 0;
+}
+
 main form label + * {
   margin-top: 0;
 }
