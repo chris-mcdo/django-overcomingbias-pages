@@ -213,7 +213,7 @@ main form input[type="submit"] {
 main > header > ul {
   display: flex;
   flex-wrap: wrap;
-  gap: 1em;
+  gap: 0 1em;
   align-items: center;
   margin-top: 0.5em;
 }
@@ -222,6 +222,9 @@ main > header > ul > li + * {
   margin-top: 0;
 }
 
+main header ul {
+  margin: 0;
+}
 
 /* Text in main body */
 
@@ -250,6 +253,11 @@ section > ul > li {
 }
 
 p + ul {
+  margin-top: 1.5em;
+  margin-left: 1.5em;
+}
+
+header + menu {
   margin-top: 1.5em;
   margin-left: 1.5em;
 }
@@ -346,18 +354,6 @@ p + ul {
   text-align: center;
 }
 
-/* Search sort options */
-
-.search-filters {
-  display: flex;
-  flex-direction: column;
-  gap: 1em;
-}
-
-.search-filters * {
-  margin-top: 0;
-}
-
 /* Sequence member move form */
 
 .sequencemember-edit {
@@ -380,11 +376,4 @@ p + ul {
   fill: none;
   stroke: var(--border-primary);
   stroke-width: 0.5px;
-}
-
-/* User options */
-
-.user-options {
-  display: block;
-  list-style: inside;
 }
