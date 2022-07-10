@@ -484,4 +484,9 @@ class UserDetailView(DetailView):
     template_name = f"{OBPAGES_PAGES_PATH}/user_detail.html"
     slug_url_kwarg = "user_slug"
     model = User
-    extra_context = {"title": "Your Profile"}
+    context_object_name = "displayed_user"
+
+    def get_context_data(self, **kwargs):
+        kwargs = super().get_context_data(**kwargs)
+        kwargs["title"] = f"{self.object.username}'s profile"
+        return kwargs

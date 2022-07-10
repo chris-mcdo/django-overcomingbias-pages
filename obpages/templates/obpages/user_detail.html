@@ -1,19 +1,12 @@
 {% extends "obpages/base.html" %}
 
-{% block content_title %}
-    <h1>{{ user.username }}</h1>
-{% endblock %}
-
-
 {% block content %}
     <section>
         <header>
-            <h2>Options</h2>
+            <h2>User Actions</h2>
         </header>
         <menu>
-            <li><a href="{% url "manage_account" %}">Manage your account</a></li>
-            <li><a href="{% url "sequence_create" %}">Create a sequence</a></li>
-            <li><a href="{% url "sequence_list" user_slug=user.slug %}">View your sequences</a></li>
+            <li><a href="{% url "sequence_list" user_slug=displayed_user.slug %}">View public sequences</a></li>
         </menu>
     </section>
 {% endblock %}

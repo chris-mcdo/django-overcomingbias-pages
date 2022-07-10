@@ -41,7 +41,7 @@ class CustomLoginView(LoginView):
 
     def get_default_redirect_url(self):
         """Return the default redirect URL."""
-        return self.request.user.get_absolute_url()
+        return reverse("manage_account")
 
 
 class CustomLogoutView(LogoutView):
