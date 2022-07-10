@@ -254,7 +254,9 @@ class SequenceListView(ListView):
             return self.queryset
 
         owner_slug = self.kwargs.get("user_slug")
-        all_sequences = self.model.objects.filter(owner__slug=owner_slug)
+        all_sequences = self.model.objects.filter(owner__slug=owner_slug).order_by(
+            "title"
+        )
 
         if self.request.user.is_authenticated and self.request.user.slug == owner_slug:
             return all_sequences

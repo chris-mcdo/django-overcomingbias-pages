@@ -17,7 +17,10 @@
         {% endblock %}
         {% block content_subtitle %}
             {% comment %} <p><a href="{{ owner.get_absolute_url }}">{{ owner.username }}</a></p> {% endcomment %}
-            <p>By {{ owner.username }}</p>
+            <p>
+                By
+                <a href="{% url "user_detail" user_slug=owner.slug %}">{{ owner.username }}</a>
+            </p>
             {% with total=sequence.members.count %}
                 <p>{{ total }} item{{ total|pluralize }}</p>
             {% endwith %}
