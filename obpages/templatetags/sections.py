@@ -63,11 +63,11 @@ def sequence_section(section, max_results=None):
     all_sequences = UserSequence.objects.all()
     if section == "curated":
         title = "Recent Curated Sequences"
-        queryset = all_sequences.filter(curated=True).order_by("-update_timestamp")
+        queryset = all_sequences.filter(curated=True)
         more_url = reverse("sequence_curated_list")
     elif section == "user":
         title = "Recent User-Created Sequences"
-        queryset = all_sequences.filter(public=True).order_by("-update_timestamp")
+        queryset = all_sequences.filter(public=True)
         more_url = reverse("sequence_public_list")
 
     sequence_count = queryset.count()

@@ -60,7 +60,7 @@ class UserSequence(BaseSequence):
         default=False, help_text="Whether the sequence has been curated."
     )
 
-    class Meta:
+    class Meta(BaseSequence.Meta):
         constraints = [
             models.UniqueConstraint(
                 fields=["owner", "slug"], name="unique_usersequence_slug"

@@ -291,9 +291,7 @@ class SequenceUserListView(ListView):
             return self.queryset
 
         owner_slug = self.kwargs.get("user_slug")
-        all_sequences = self.model.objects.filter(owner__slug=owner_slug).order_by(
-            "-update_timestamp"
-        )
+        all_sequences = self.model.objects.filter(owner__slug=owner_slug)
 
         if self.request.user.is_authenticated and self.request.user.slug == owner_slug:
             return all_sequences
@@ -324,7 +322,7 @@ class SequenceCuratedListView(ListView):
         if self.queryset is not None:
             return self.queryset
 
-        return self.model.objects.filter(curated=True).order_by("-update_timestamp")
+        return self.model.objects.filter(curated=True)
 
 
 class SequencePublicListView(ListView):
@@ -338,7 +336,7 @@ class SequencePublicListView(ListView):
         if self.queryset is not None:
             return self.queryset
 
-        return self.model.objects.filter(public=True).order_by("-update_timestamp")
+        return self.model.objects.filter(public=True)
 
 
 class SequenceDetailView(DetailView):
