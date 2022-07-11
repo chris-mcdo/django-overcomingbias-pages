@@ -67,6 +67,14 @@ TEMPLATES = [
     },
 ]
 
+# Huey
+HUEY = {
+    "huey_class": "huey.MemoryHuey",
+    "name": "obpages",
+    "immediate": True,
+}
+
+
 # Haystack settings
 # Ignore haystack for now
 
