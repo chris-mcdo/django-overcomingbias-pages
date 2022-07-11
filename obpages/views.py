@@ -31,8 +31,8 @@ from obapi.models import EssayContentItem, OBContentItem, YoutubeContentItem
 
 from obpages.forms import (
     DefaultSearchForm,
-    SequenceExportForm,
     SequenceChangeForm,
+    SequenceExportForm,
     SequenceMemberMoveForm,
     UserSequenceMemberAddForm,
 )
@@ -250,10 +250,7 @@ class ExploreListView(ListView):
 @require_GET
 def sequence_base(request):
     context = {
-        "title": "Curated Sequences",
-        "intro_sequences": UserSequence.objects.filter(public=True),
-        "popular_sequences": UserSequence.objects.filter(public=True),
-        "recent_sequences": UserSequence.objects.filter(public=True),
+        "title": "Sequences",
         "max_results": RESULTS_PER_SECTION,
     }
     return render(request, f"{OBPAGES_PAGES_PATH}/sequence_base.html", context)
@@ -284,7 +281,7 @@ class SequenceCreateView(LoginRequiredMixin, CreateView):
 
 
 class SequenceUserListView(ListView):
-    template_name = f"{OBPAGES_PAGES_PATH}/sequence_user_list.html"
+    template_name = f"{OBPAGES_PAGES_PATH}/sequence_list.html"
     paginate_by = RESULTS_PER_PAGE
     model = UserSequence
     context_object_name = "sequences"
@@ -295,7 +292,7 @@ class SequenceUserListView(ListView):
 
         owner_slug = self.kwargs.get("user_slug")
         all_sequences = self.model.objects.filter(owner__slug=owner_slug).order_by(
-            "title"
+            "-update_timestamp"
         )
 
         if self.request.user.is_authenticated and self.request.user.slug == owner_slug:
@@ -305,15 +302,43 @@ class SequenceUserListView(ListView):
         return public_sequences
 
     def get_context_data(self, **kwargs):
-        owner = User.objects.get(slug=self.kwargs.get("user_slug"))
-        kwargs.update(
-            {
-                "title": "Your Sequences",
-                "owner": owner,
-                "user_is_owner": self.request.user == owner,
-            }
-        )
+        owner_slug = self.kwargs.get("user_slug")
+        if self.request.user.is_authenticated and self.request.user.slug == owner_slug:
+            title = "Your Sequences"
+        else:
+            owner = User.objects.get(slug=owner_slug)
+            title = f"{owner}'s Sequences"
+
+        kwargs.update({"title": title})
         return super().get_context_data(**kwargs)
+
+
+class SequenceCuratedListView(ListView):
+    template_name = f"{OBPAGES_PAGES_PATH}/sequence_list.html"
+    paginate_by = RESULTS_PER_PAGE
+    model = UserSequence
+    context_object_name = "sequences"
+    extra_context = {"title": "Curated Sequences"}
+
+    def get_queryset(self):
+        if self.queryset is not None:
+            return self.queryset
+
+        return self.model.objects.filter(curated=True).order_by("-update_timestamp")
+
+
+class SequencePublicListView(ListView):
+    template_name = f"{OBPAGES_PAGES_PATH}/sequence_list.html"
+    paginate_by = RESULTS_PER_PAGE
+    model = UserSequence
+    context_object_name = "sequences"
+    extra_context = {"title": "User-Created Sequences"}
+
+    def get_queryset(self):
+        if self.queryset is not None:
+            return self.queryset
+
+        return self.model.objects.filter(public=True).order_by("-update_timestamp")
 
 
 class SequenceDetailView(DetailView):

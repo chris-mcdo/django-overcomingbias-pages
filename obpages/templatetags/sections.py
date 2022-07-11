@@ -5,6 +5,7 @@ from django.db.models import Prefetch
 from django.urls import reverse
 from obapi.models import ContentItem
 
+from obpages.models import UserSequence
 from obpages.templatetags.constants import OBPAGES_COMPONENTS_PATH
 
 OBPAGES_SECTIONS_PATH = f"{OBPAGES_COMPONENTS_PATH}/sections"
@@ -53,6 +54,37 @@ def explore_section(model_name, max_results=None):
         "url": reverse("explore_list", kwargs={"model_name": model_name}),
         "items": items,
         "item_count": item_count,
+        "more_count": more_count,
+    }
+
+
+@register.inclusion_tag(f"{OBPAGES_SECTIONS_PATH}/sequence_section.html")
+def sequence_section(section, max_results=None):
+    all_sequences = UserSequence.objects.all()
+    if section == "curated":
+        title = "Recent Curated Sequences"
+        queryset = all_sequences.filter(curated=True).order_by("-update_timestamp")
+        more_url = reverse("sequence_curated_list")
+    elif section == "user":
+        title = "Recent User-Created Sequences"
+        queryset = all_sequences.filter(public=True).order_by("-update_timestamp")
+        more_url = reverse("sequence_public_list")
+
+    sequence_count = queryset.count()
+
+    if max_results is not None:
+        items = list(queryset[0:max_results])
+    else:
+        items = list(queryset)
+
+    more_count = sequence_count - len(items)
+
+    return {
+        "title": title,
+        "verbose_name": "Sequence",
+        "url": more_url,
+        "items": items,
+        "item_count": sequence_count,
         "more_count": more_count,
     }
 

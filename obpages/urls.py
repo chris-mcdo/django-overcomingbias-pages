@@ -82,6 +82,16 @@ urlpatterns = [
     # Sequences
     path("sequences", views.sequence_base, name="sequence_base"),
     path(
+        "sequences/curated",
+        views.SequenceCuratedListView.as_view(),
+        name="sequence_curated_list",
+    ),
+    path(
+        "sequences/public",
+        views.SequencePublicListView.as_view(),
+        name="sequence_public_list",
+    ),
+    path(
         "sequences/create", views.SequenceCreateView.as_view(), name="sequence_create"
     ),
     # User pages

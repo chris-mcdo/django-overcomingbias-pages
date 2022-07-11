@@ -2,8 +2,21 @@
 {% load sections %}
 
 {% block content %}
-    <p>Description of what a sequence is goes here</p>
-    {% query_results intro_sequences title="Introductory Sequences" max_results=max_results %}
-    {% query_results popular_sequences title="Popular Sequences" max_results=max_results %}
-    {% query_results recent_sequences title="Recently Curated Sequences" max_results=max_results %}
+    {% sequence_section "curated" max_results=max_results %}
+    {% sequence_section "user" max_results=max_results %}
+    <section>
+        <header>
+            <h3>About</h3>
+        </header>
+        <p>A sequence is an ordered collection of related content.</p>
+        <p>Try using them as:</p>
+        <ul>
+            <li>Reading lists: keep track of what you have read</li>
+            <li>Favourites: keep track of what you found interesting / useful</li>
+            <li>Compilations: collect and publish the best content on a given topic</li>
+        </ul>
+        <p>Once you have created a sequence, you can export it to epub, pdf or HTML formats (more formats available on request!).</p>
+        <p>If you think your sequence is good enough for this page, leave some <a href={% url "feedback" %}>feedback</a> and I may curate it.</p>
+        <p><a href="{% url "sequence_create" %}">Create a sequence...</a></p>
+    </section>
 {% endblock %}
