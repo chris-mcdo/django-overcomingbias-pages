@@ -88,8 +88,8 @@ urlpatterns = [
     path("users/<str:user_slug>", views.UserDetailView.as_view(), name="user_detail"),
     path(
         "users/<str:user_slug>/sequences",
-        views.SequenceListView.as_view(),
-        name="sequence_list",
+        views.SequenceUserListView.as_view(),
+        name="sequence_user_list",
     ),
     path(
         "users/<str:user_slug>/sequences/<str:sequence_slug>",

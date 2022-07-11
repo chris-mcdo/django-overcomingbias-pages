@@ -6,7 +6,7 @@
             <h2>User Actions</h2>
         </header>
         <menu>
-            <li><a href="{% url "sequence_list" user_slug=displayed_user.slug %}">View public sequences</a></li>
+            <li><a href="{% url "sequence_user_list" user_slug=displayed_user.slug %}">View public sequences</a></li>
         </menu>
     </section>
 {% endblock %}

@@ -283,8 +283,8 @@ class SequenceCreateView(LoginRequiredMixin, CreateView):
         )
 
 
-class SequenceListView(ListView):
-    template_name = f"{OBPAGES_PAGES_PATH}/sequence_list.html"
+class SequenceUserListView(ListView):
+    template_name = f"{OBPAGES_PAGES_PATH}/sequence_user_list.html"
     paginate_by = RESULTS_PER_PAGE
     model = UserSequence
     context_object_name = "sequences"
@@ -440,7 +440,7 @@ class SequenceDeleteView(DeleteView):
 
     def get_success_url(self):
         user_slug = self.kwargs.get("user_slug")
-        return reverse("sequence_list", kwargs={"user_slug": user_slug})
+        return reverse("sequence_user_list", kwargs={"user_slug": user_slug})
 
 
 class SequenceMemberMoveView(FormMixin, View):
