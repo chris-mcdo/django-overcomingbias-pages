@@ -31,7 +31,7 @@ from obapi.models import EssayContentItem, OBContentItem, YoutubeContentItem
 
 from obpages.forms import (
     DefaultSearchForm,
-    ExportSequenceForm,
+    SequenceExportForm,
     SequenceChangeForm,
     SequenceMemberMoveForm,
     UserSequenceMemberAddForm,
@@ -343,7 +343,7 @@ class SequenceDetailView(DetailView):
             **{
                 "title": self.object.title,
                 "owner": self.object.owner,
-                "export_form": ExportSequenceForm(),
+                "export_form": SequenceExportForm(),
                 "user_is_owner": self.request.user == self.object.owner,
             }
         )
@@ -362,7 +362,7 @@ def sequence_export_view(request, user_slug, sequence_slug):
         raise Http404
 
     # Construct form
-    form = ExportSequenceForm(data=request.GET)
+    form = SequenceExportForm(data=request.GET)
     if form.is_valid():
         writer = form.cleaned_data["writer"]()
         result = obapi.export.export_sequence(sequence, writer)

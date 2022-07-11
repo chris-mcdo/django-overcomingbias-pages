@@ -176,7 +176,7 @@ class DefaultSearchForm(forms.Form):
             )
 
 
-class ExportSequenceForm(forms.Form):
+class SequenceExportForm(forms.Form):
     writer = PandocWriterField(label="Export To", initial="epub")
 
 
