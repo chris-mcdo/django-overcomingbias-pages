@@ -108,8 +108,8 @@ urlpatterns = [
     ),
     path(
         "users/<str:user_slug>/sequences/<str:sequence_slug>/edit",
-        views.SequenceEditView.as_view(),
-        name="sequence_edit",
+        views.SequenceUpdateView.as_view(),
+        name="sequence_update",
     ),
     path(
         "users/<str:user_slug>/sequences/<str:sequence_slug>/delete",

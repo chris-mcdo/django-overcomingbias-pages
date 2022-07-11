@@ -31,7 +31,7 @@ from obapi.models import EssayContentItem, OBContentItem, YoutubeContentItem
 
 from obpages.forms import (
     DefaultSearchForm,
-    SequenceChangeForm,
+    SequenceUpdateForm,
     SequenceExportForm,
     SequenceMemberMoveForm,
     UserSequenceMemberAddForm,
@@ -190,7 +190,7 @@ def sequence_add_view(request, item_source, item_id):
         saved_member = form.save()
         sequence = saved_member.sequence
         success_url = reverse(
-            "sequence_edit",
+            "sequence_update",
             kwargs={"user_slug": request.user.slug, "sequence_slug": sequence.slug},
         )
         return HttpResponseRedirect(success_url)
@@ -402,10 +402,10 @@ def sequence_export_view(request, user_slug, sequence_slug):
         return HttpResponseBadRequest()
 
 
-class SequenceEditView(UpdateView):
-    template_name = f"{OBPAGES_PAGES_PATH}/sequence_edit.html"
+class SequenceUpdateView(UpdateView):
+    template_name = f"{OBPAGES_PAGES_PATH}/sequence_update.html"
     model = UserSequence
-    form_class = SequenceChangeForm
+    form_class = SequenceUpdateForm
     context_object_name = "sequence"
     extra_context = {"title": "Edit Sequence"}
 
@@ -496,7 +496,7 @@ class SequenceMemberMoveView(FormMixin, View):
         """Return the URL to redirect to after processing a valid form."""
         sequence = self.object.sequence
         return reverse(
-            "sequence_edit",
+            "sequence_update",
             kwargs={
                 "user_slug": sequence.owner.slug,
                 "sequence_slug": sequence.slug,
@@ -535,7 +535,7 @@ def sequencemember_delete_view(request, user_slug, sequence_slug, order):
         order=order,
     )
     success_url = reverse(
-        "sequence_edit",
+        "sequence_update",
         kwargs={
             "user_slug": sequence_member.sequence.owner.slug,
             "sequence_slug": sequence_member.sequence.slug,

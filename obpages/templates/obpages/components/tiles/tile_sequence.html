@@ -5,7 +5,7 @@
         {% sequence_link sequence %}
         {% if user_is_owner %}
             <i>
-                <a href="{% url "sequence_edit" user_slug=owner.slug sequence_slug=sequence.slug %}">edit</a>
+                <a href="{% url "sequence_update" user_slug=owner.slug sequence_slug=sequence.slug %}">edit</a>
             </i>
         {% endif %}
     </h5>
