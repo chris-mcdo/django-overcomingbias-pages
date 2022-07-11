@@ -56,6 +56,9 @@ class UserSequence(BaseSequence):
     public = models.BooleanField(
         default=False, help_text="Whether the sequence is public or private."
     )
+    curated = models.BooleanField(
+        default=False, help_text="Whether the sequence has been curated."
+    )
 
     class Meta:
         constraints = [
