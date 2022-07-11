@@ -80,7 +80,7 @@ urlpatterns = [
         name="explore_detail",
     ),
     # Sequences
-    path("sequences", views.sequence_curated, name="sequence_curated"),
+    path("sequences", views.sequence_base, name="sequence_base"),
     path(
         "sequences/create", views.SequenceCreateView.as_view(), name="sequence_create"
     ),

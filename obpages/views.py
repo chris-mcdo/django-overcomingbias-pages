@@ -248,7 +248,7 @@ class ExploreListView(ListView):
 
 
 @require_GET
-def sequence_curated(request):
+def sequence_base(request):
     context = {
         "title": "Curated Sequences",
         "intro_sequences": UserSequence.objects.filter(public=True),
@@ -256,7 +256,7 @@ def sequence_curated(request):
         "recent_sequences": UserSequence.objects.filter(public=True),
         "max_results": RESULTS_PER_SECTION,
     }
-    return render(request, f"{OBPAGES_PAGES_PATH}/sequence_curated.html", context)
+    return render(request, f"{OBPAGES_PAGES_PATH}/sequence_base.html", context)
 
 
 class SequenceCreateView(LoginRequiredMixin, CreateView):
