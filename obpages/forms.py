@@ -180,7 +180,7 @@ class SequenceExportForm(forms.Form):
     writer = PandocWriterField(label="Export To", initial="epub")
 
 
-class SequenceUpdateForm(forms.ModelForm):
+class SequenceChangeForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["abstract"].widget.attrs.pop("cols")

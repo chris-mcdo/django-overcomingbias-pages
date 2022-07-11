@@ -5,7 +5,6 @@ from django.apps import apps
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.exceptions import PermissionDenied
 from django.db.models import Count
 from django.http import (
     Http404,
@@ -31,7 +30,7 @@ from obapi.models import EssayContentItem, OBContentItem, YoutubeContentItem
 
 from obpages.forms import (
     DefaultSearchForm,
-    SequenceUpdateForm,
+    SequenceChangeForm,
     SequenceExportForm,
     SequenceMemberMoveForm,
     UserSequenceMemberAddForm,
@@ -259,7 +258,7 @@ def sequence_base(request):
 class SequenceCreateView(LoginRequiredMixin, CreateView):
     template_name = f"{OBPAGES_PAGES_PATH}/sequence_create.html"
     model = UserSequence
-    fields = ("title", "abstract", "public")
+    form_class = SequenceChangeForm
     extra_context = {"title": "Create Sequence"}
 
     def post(self, request, *args, **kwargs):
@@ -402,18 +401,12 @@ def sequence_export_view(request, user_slug, sequence_slug):
         return HttpResponseBadRequest()
 
 
-class SequenceUpdateView(UpdateView):
+class SequenceUpdateView(LoginRequiredMixin, UpdateView):
     template_name = f"{OBPAGES_PAGES_PATH}/sequence_update.html"
     model = UserSequence
-    form_class = SequenceUpdateForm
+    form_class = SequenceChangeForm
     context_object_name = "sequence"
     extra_context = {"title": "Edit Sequence"}
-
-    def dispatch(self, request, *args, **kwargs):
-        owner_slug = self.kwargs.get("user_slug")
-        if not request.user.is_authenticated or request.user.slug != owner_slug:
-            raise PermissionDenied
-        return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
@@ -436,9 +429,10 @@ class SequenceUpdateView(UpdateView):
             return self.form_invalid(form)
 
     def get_object(self, queryset=None):
-        user_slug = self.kwargs.get("user_slug")
         sequence_slug = self.kwargs.get("sequence_slug")
-        return get_object_or_404(self.model, owner__slug=user_slug, slug=sequence_slug)
+        return get_object_or_404(
+            self.model, owner=self.request.user, slug=sequence_slug
+        )
 
     def get_success_url(self):
         return reverse(
@@ -450,16 +444,17 @@ class SequenceUpdateView(UpdateView):
         )
 
 
-class SequenceDeleteView(DeleteView):
+class SequenceDeleteView(LoginRequiredMixin, DeleteView):
     template_name = f"{OBPAGES_PAGES_PATH}/sequence_delete.html"
     model = UserSequence
-    template_name_field = "sequence"
+    context_object_name = "sequence"
     extra_context = {"title": "Delete Sequence"}
 
     def get_object(self, queryset=None):
-        user_slug = self.kwargs.get("user_slug")
         sequence_slug = self.kwargs.get("sequence_slug")
-        return get_object_or_404(self.model, owner__slug=user_slug, slug=sequence_slug)
+        return get_object_or_404(
+            self.model, owner=self.request.user, slug=sequence_slug
+        )
 
     def get_success_url(self):
         user_slug = self.kwargs.get("user_slug")
