@@ -109,6 +109,7 @@ class UserSequenceAdmin(OrderedInlineModelAdminMixin, admin.ModelAdmin):
     model = UserSequence
     list_display = ("title",)
     inlines = (UserSequenceMemberInline,)
+    readonly_fields = ("create_timestamp", "update_timestamp")
 
 
 # Override obapi content item admin
