@@ -6,7 +6,15 @@ from obpages.models import User
 
 
 class RegisterForm(UserCreationForm):
-    email = forms.EmailField(label="Email Address")
+    email = forms.EmailField(
+        label="Email Address", help_text="Enter your email address."
+    )
+    password1 = forms.CharField(
+        label="Password",
+        strip=False,
+        widget=forms.PasswordInput(attrs={"autocomplete": "new-password"}),
+        help_text="Enter a secure password.",
+    )
 
     class Meta:
         model = User
