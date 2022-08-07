@@ -1,6 +1,8 @@
 {% extends "obpages/base.html" %}
 {% load sections %}
 
+{% block meta_description %}Update sequence {{ sequence }}.{% endblock %}
+
 {% block content_title %}
     <h1>Edit <i>{{ sequence.title }}</i></h1>
 {% endblock content_title %}

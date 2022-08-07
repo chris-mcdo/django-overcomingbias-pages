@@ -1,6 +1,8 @@
 {% extends "obpages/base.html" %}
 {% load sections %}
 
+{% block meta_description %}View curated and user-created sequences.{% endblock %}
+
 {% block content %}
     {% sequence_section "curated" max_results=max_results %}
     {% sequence_section "user" max_results=max_results %}

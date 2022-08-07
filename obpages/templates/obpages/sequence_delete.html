@@ -1,5 +1,7 @@
 {% extends "obpages/base.html" %}
 
+{% block meta_description %}Delete sequence {{ sequence }}.{% endblock %}
+
 {% block content %}
 <form method="post" novalidate>
     {% csrf_token %}

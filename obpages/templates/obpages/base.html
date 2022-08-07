@@ -8,9 +8,9 @@
         {% comment %} Mobile support {% endcomment %}
         <meta name="viewport" content="width=device-width, initial-scale=1">
         {% comment %} Title, author, description {% endcomment %}
-        <title>{% block title %}{{ title }} | OBCollection{% endblock %}</title>
+        <title>{% block meta_title %}{{ title }} | OBCollection{% endblock %}</title>
         <meta name="author" content="Chris McDonald">
-        <meta name="description" content="A collection of Robin Hanson's content.">
+        <meta name="description" content="{% block meta_description %}A collection of Robin Hanson's content.{% endblock %}">
         {% comment %} Open Graph metadata (Facebook) {% endcomment %}
         <meta property="og:url" content="{{ request.build_absolute_uri }}">
         <meta property="og:title" content="{{ title }} | OBCollection">

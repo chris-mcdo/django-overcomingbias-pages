@@ -1,5 +1,7 @@
 {% extends "obpages/base.html" %}
-{% load sections widgets %}
+{% load sections widgets utils %}
+
+{% block meta_description %}{% if item|verbose_name == "author" %}View content by {{ item.name }} on overcomingbias-collection.{% else %}View content on {{ item.name }} on overcomingbias-collection.{% endif %}{% endblock %}
 
 {% block content %}
     {% query_results query_results title="All" row=True %}

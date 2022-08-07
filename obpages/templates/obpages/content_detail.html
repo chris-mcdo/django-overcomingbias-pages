@@ -1,5 +1,7 @@
 {% extends "obpages/base.html" %}
-{% load more_like_this sections widgets links %}
+{% load more_like_this sections widgets links utils %}
+
+{% block meta_description %}View {{ item|verbose_name }} {{ item.title }} on overcomingbias-collection.{% endblock %}
 
 {% block content_title %}
     <header>

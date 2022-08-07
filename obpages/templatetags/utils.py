@@ -25,6 +25,11 @@ def is_sequence(value):
 
 
 @register.filter
+def verbose_name(item):
+    return item._meta.verbose_name
+
+
+@register.filter
 def verbose_name_plural(item):
     return item._meta.verbose_name_plural
 
