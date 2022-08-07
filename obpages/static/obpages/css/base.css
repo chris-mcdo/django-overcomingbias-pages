@@ -183,6 +183,11 @@ main form label {
   white-space: nowrap;
 }
 
+main form .container-checkbox {
+  display: flex;
+  gap: 1em;
+}
+
 main form * + * {
   margin-top: 1.5em;
 }
@@ -208,10 +213,6 @@ main form h1 {
 
 main form input[type="submit"] {
   justify-self: center;
-}
-
-main form br {
-  display: none;
 }
 
 .errorlist {
