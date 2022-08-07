@@ -8,6 +8,8 @@ from obapi.models import (
     YoutubeContentItem,
 )
 
+from obpages import utils
+
 INDEX_TEMPLATES_PATH = "obpages/indexes"
 
 
@@ -31,6 +33,7 @@ class ContentItemIndex(indexes.SearchIndex):
         template_name=f"{INDEX_TEMPLATES_PATH}/contentitem_text.txt",
     )
     title = indexes.CharField(model_attr="title")
+    slug = indexes.CharField(stored=True, indexed=False)
     publish_date = indexes.DateTimeField(
         model_attr="publish_date", stored=True, indexed=False
     )
@@ -49,6 +52,9 @@ class ContentItemIndex(indexes.SearchIndex):
 
     def prepare_many_to_many(self, obj, field):
         return [item.slug for item in getattr(obj, field).all()]
+
+    def prepare_slug(self, obj):
+        return utils.to_slug(obj.title, max_length=200)
 
 
 class OBContentItemIndex(ContentItemIndex, indexes.Indexable):

@@ -36,7 +36,9 @@ class DefaultSearchForm(forms.Form):
 
     sort = SortOptionsField(
         options={
-            "relevance": ("Relevance", "-_score"),  # "_score" is ElasticSearch-specific
+            # important NOTE: "_score" is ElasticSearch-specific!
+            "relevance": ("Relevance", "-_score"),
+            "alphabetical": ("Title", "slug"),
             "newest": ("Newest First", "-publish_date"),
             "oldest": ("Oldest First", "publish_date"),
         },
