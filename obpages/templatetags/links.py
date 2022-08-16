@@ -11,7 +11,11 @@ register = template.Library()
 @register.inclusion_tag(f"{OBPAGES_LINKS_PATH}/nav_link.html")
 def nav_link(request, name, title):
     url = reverse(viewname=name)
-    current = url == request.path
+    try:
+        current = url == request.path
+    except AttributeError:
+        # request has no path attribute; likely a server error
+        current = False
     return {"url": reverse(viewname=name), "title": title, "current": current}
 
 
