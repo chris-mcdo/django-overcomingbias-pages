@@ -8,8 +8,8 @@ register = template.Library()
 
 
 @register.inclusion_tag(f"{OBPAGES_TILES_PATH}/tile_content.html")
-def content_tile(item):
-    return {"item": item}
+def content_tile(item, is_staff=False):
+    return {"item": item, "is_staff": is_staff}
 
 
 @register.inclusion_tag(f"{OBPAGES_TILES_PATH}/tile_classifier.html")

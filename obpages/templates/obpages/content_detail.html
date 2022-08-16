@@ -5,7 +5,7 @@
 
 {% block content_title %}
     <header>
-        <h1>{% content_link item %}</h1>
+        <h1>{% content_link item=item is_staff=user.is_staff %}</h1>
         <p>
             By
             {% author_list item.authors.all %}
@@ -42,9 +42,9 @@
             </form>
         </section>
     {% endif %}
-    {% query_results query_results=item.internal_links.select_subclasses title="Mentions" max_results=max_results %}
-    {% query_results query_results=item.internal_pingbacks.select_subclasses title="Mentioned By" max_results=max_results %}
+    {% query_results query_results=item.internal_links.select_subclasses title="Mentions" max_results=max_results is_staff=user.is_staff %}
+    {% query_results query_results=item.internal_pingbacks.select_subclasses title="Mentioned By" max_results=max_results is_staff=user.is_staff %}
     {% more_like_this item as related_content %}
-    {% search_results search_results=related_content title="More Like This" max_results=max_results %}
+    {% search_results search_results=related_content title="More Like This" max_results=max_results is_staff=user.is_staff %}
 {% endblock %}
 

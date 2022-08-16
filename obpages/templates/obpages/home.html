@@ -27,8 +27,8 @@
         </p>
         <p><i>Work in progress!</i></p>
     </section>
-    {% query_results query_results=curated_essaycontentitems title="Curated Essays" max_results=max_results row=True %}
-    {% query_results query_results=curated_obcontentitems title="Curated Posts" max_results=max_results row=True %}
-    {% query_results query_results=curated_youtubecontentitems title="Curated Youtube Videos" max_results=max_results row=True %}
-    {% query_results query_results=curated_spotifycontentitems title="Curated Spotify Episodes" max_results=max_results row=True %}
+    {% query_results query_results=curated_essaycontentitems title="Curated Essays" max_results=max_results row=True is_staff=user.is_staff %}
+    {% query_results query_results=curated_obcontentitems title="Curated Posts" max_results=max_results row=True is_staff=user.is_staff %}
+    {% query_results query_results=curated_youtubecontentitems title="Curated Youtube Videos" max_results=max_results row=True is_staff=user.is_staff %}
+    {% query_results query_results=curated_spotifycontentitems title="Curated Spotify Episodes" max_results=max_results row=True is_staff=user.is_staff %}
 {% endblock content %}

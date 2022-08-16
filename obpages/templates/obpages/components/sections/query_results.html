@@ -9,7 +9,7 @@
     <ol class="tile-list tile-list-{% if row %}row{% else %}column{% endif %}">
         {% for item in query_results %}
             {% if item|is_content %}
-                {% content_tile item=item %}
+                {% content_tile item=item is_staff=is_staff %}
             {% elif item|is_classifier %}
                 {% classifier_tile item=item detailed=detailed %}
             {% elif item|is_sequence %}

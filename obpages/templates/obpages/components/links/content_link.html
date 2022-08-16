@@ -8,4 +8,7 @@
             <path d="M34 48 79 3m0 37V0M42 3h40"/>
         </svg>
     </a>
+    {% if is_staff %}
+        <a href="{{ admin_url }}"><i>Edit</i></a>
+    {% endif %}
 </span>

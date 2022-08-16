@@ -8,7 +8,7 @@
     {% endif %}
     <ol class="tile-list tile-list-column">
         {% for result in search_results %}
-            {% content_tile item=result.object %}
+            {% content_tile item=result.object is_staff=is_staff %}
         {% empty %}
             <p>No results found.</p>
         {% endfor %}

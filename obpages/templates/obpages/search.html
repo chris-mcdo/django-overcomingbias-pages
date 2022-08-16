@@ -25,7 +25,7 @@
         </details>
     {% endblock %}
     {% block result_list %}
-        {% search_results search_results %}
+        {% search_results search_results is_staff=user.is_staff %}
     {% endblock %}
     {% if is_paginated %}
         {% block pagination %}

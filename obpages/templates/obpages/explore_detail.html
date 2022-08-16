@@ -17,7 +17,7 @@
             <p>{% if description %}{{ item.description }}{% else %}<i>This {{ item|verbose_name }} has no description.</i>{% endif %}</p>
         {% endwith %}
     </section>
-    {% query_results query_results=item.content.recent.select_subclasses title="Recent Content" max_results=max_results %}
+    {% query_results query_results=item.content.recent.select_subclasses title="Recent Content" max_results=max_results is_staff=user.is_staff %}
     {% comment %} Introductory sequences {% endcomment %}
     {% comment %} ... {% endcomment %}
     {% comment %} Sequences which mention this {% endcomment %}

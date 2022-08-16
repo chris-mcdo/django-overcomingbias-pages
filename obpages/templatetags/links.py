@@ -21,8 +21,11 @@ def site_link(item):
 
 
 @register.inclusion_tag(f"{OBPAGES_LINKS_PATH}/content_link.html")
-def content_link(item):
-    return {"item": item}
+def content_link(item, is_staff=False):
+    admin_url = reverse(
+        f"admin:{item._meta.app_label}_{item._meta.model_name}_change", args=(item.pk,)
+    )
+    return {"item": item, "is_staff": is_staff, "admin_url": admin_url}
 
 
 @register.inclusion_tag(f"{OBPAGES_LINKS_PATH}/classifier_link.html")

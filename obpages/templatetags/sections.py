@@ -16,7 +16,12 @@ register = template.Library()
 
 @register.inclusion_tag(f"{OBPAGES_SECTIONS_PATH}/query_results.html")
 def query_results(
-    query_results, title=None, detailed=False, row=False, max_results=None
+    query_results,
+    title=None,
+    detailed=False,
+    row=False,
+    max_results=None,
+    is_staff=False,
 ):
     if max_results is not None:
         query_results = query_results[0:max_results]
@@ -26,15 +31,16 @@ def query_results(
         "title": title,
         "row": row,
         "detailed": detailed,
+        "is_staff": is_staff,
     }
 
 
 @register.inclusion_tag(f"{OBPAGES_SECTIONS_PATH}/search_results.html")
-def search_results(search_results, title=None, max_results=None):
+def search_results(search_results, title=None, max_results=None, is_staff=False):
     if max_results is not None:
         search_results = search_results[0:max_results]
 
-    return {"search_results": search_results, "title": title}
+    return {"search_results": search_results, "title": title, "is_staff": is_staff}
 
 
 @register.inclusion_tag(f"{OBPAGES_SECTIONS_PATH}/explore_section.html")

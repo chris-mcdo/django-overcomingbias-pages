@@ -1,7 +1,7 @@
 {% load static icons widgets links %}
 
 <li class="tile tile-content tile-sequencemember">
-    <h5>{% content_link item %}</h5>
+    <h5>{% content_link item=item is_staff=user.is_staff %}</h5>
     <p>{% author_list item.authors.all %}</p>
     <p>{{ item.publish_date|date:"F jS, Y" }}</p>
     <a href="{{ item.site_url }}">
