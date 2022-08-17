@@ -49,6 +49,8 @@ To configure ``django-overcomingbias-pages``, add the following to your settings
     "huey.contrib.djhuey",
     # django-overcomingbias-pages
     "obpages",
+    # custom form rendering
+    "django.forms",
   ]
 
   # Use the (custom) obpages user model 
