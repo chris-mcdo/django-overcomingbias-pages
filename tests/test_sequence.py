@@ -5,9 +5,9 @@ from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from obapi.models import (
     SEQUENCE_SLUG_MAX_LENGTH,
-    AudioContentItem,
-    TextContentItem,
-    VideoContentItem,
+    EssayContentItem,
+    SpotifyContentItem,
+    YoutubeContentItem,
 )
 
 from obpages.models import User, UserSequence
@@ -45,9 +45,15 @@ class TestCreateUserSequence:
     def test_can_create_normal_sequence(self, james, alice):
         # Arrange
         now = datetime.datetime.now(tz=datetime.timezone.utc)
-        video = VideoContentItem.objects.create(title="Video Item", publish_date=now)
-        audio = AudioContentItem.objects.create(title="Audio Item", publish_date=now)
-        text = TextContentItem.objects.create(title="Text Item", publish_date=now)
+        video = YoutubeContentItem.objects.create(
+            title="YouTube Item", item_id="4yZKGbq1YmA", publish_date=now
+        )
+        audio = SpotifyContentItem.objects.create(
+            title="Spotify Item", item_id="6z8lvJia3OzcIVCStbmEtU", publish_date=now
+        )
+        text = EssayContentItem.objects.create(
+            title="Essay Item", item_id="example", publish_date=now
+        )
         seq_title = "Example UserSequence"
 
         # Act - create basic sequence
