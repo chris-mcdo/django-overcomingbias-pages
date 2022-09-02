@@ -12,6 +12,7 @@ from ordered_model.admin import OrderedInlineModelAdminMixin, OrderedTabularInli
 
 import obpages.tasks
 from obpages.models import (
+    CuratedContentItem,
     FeedbackNote,
     SearchIndex,
     User,
@@ -110,6 +111,12 @@ class UserSequenceAdmin(OrderedInlineModelAdminMixin, admin.ModelAdmin):
     list_display = ("title",)
     inlines = (UserSequenceMemberInline,)
     readonly_fields = ("create_timestamp", "update_timestamp")
+
+
+@admin.register(CuratedContentItem)
+class CuratedContentItemAdmin(admin.ModelAdmin):
+    model = CuratedContentItem
+    autocomplete_fields = ("content_item",)
 
 
 # Override obapi content item admin

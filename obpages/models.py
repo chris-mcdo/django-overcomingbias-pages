@@ -106,3 +106,15 @@ class FeedbackNote(models.Model):
         else:
             username = "Anonymous"
         return f"{username} - {self.create_timestamp:%a %d %b, %H:%M}"
+
+
+class CuratedContentItem(models.Model):
+    content_item = models.OneToOneField(
+        "obapi.ContentItem",
+        on_delete=models.CASCADE,
+        primary_key=True,
+        help_text="Which content item to curate",
+    )
+
+    def __str__(self):
+        return f"{self.content_item}"
