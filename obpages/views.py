@@ -406,10 +406,6 @@ class SequenceUpdateView(LoginRequiredMixin, UpdateView):
                 "sequence_delete", user_slug=user_slug, sequence_slug=sequence_slug
             )
 
-        if "_saveasnew" in request.POST:
-            # Create new Sequence object with current user as owner
-            self.object = self.model(owner=request.user)
-
         form = self.get_form()
         if form.is_valid():
             return self.form_valid(form)
@@ -430,6 +426,12 @@ class SequenceUpdateView(LoginRequiredMixin, UpdateView):
                 "sequence_slug": self.object.slug,
             },
         )
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        if "_saveasnew" in self.request.POST:
+            kwargs.update({"instance": self.model(owner=self.request.user)})
+        return kwargs
 
 
 class SequenceDeleteView(LoginRequiredMixin, DeleteView):
