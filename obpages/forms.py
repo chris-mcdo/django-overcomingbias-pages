@@ -6,12 +6,17 @@ from haystack.query import SQ, AutoQuery, SearchQuerySet
 from obapi.formfields import PandocWriterField
 from obapi.models import (  # OBContentItem, SpotifyContentItem, YoutubeContentItem,
     Author,
+    EssayContentItem,
     Idea,
+    OBContentItem,
+    SpotifyContentItem,
     Topic,
+    YoutubeContentItem,
 )
 
 from obpages.fields import (  # ContentMultipleChoiceField,
     ClassifierMultipleChoiceField,
+    ContentMultipleChoiceField,
     SortOptionsField,
 )
 from obpages.models import UserSequence, UserSequenceMember
@@ -55,6 +60,18 @@ class DefaultSearchForm(forms.Form):
     topics = ClassifierMultipleChoiceField(
         Topic, widget=django_select2.forms.Select2MultipleWidget
     )
+    content_type = ContentMultipleChoiceField(
+        models=(
+            EssayContentItem,
+            SpotifyContentItem,
+            YoutubeContentItem,
+            OBContentItem,
+        ),
+        required=False,
+        label="Content Type",
+        widget=django_select2.forms.Select2MultipleWidget,
+    )
+
     # start_date = forms.DateTimeField(
     #     required=False,
     #     label="Start Date",
@@ -64,11 +81,6 @@ class DefaultSearchForm(forms.Form):
     #     required=False,
     #     label="End Date",
     #     widget=forms.DateInput(attrs={"type": "date"}),
-    # )
-    # content_type = ContentMultipleChoiceField(
-    #     models=(SpotifyContentItem, YoutubeContentItem, OBContentItem),
-    #     required=False,
-    #     label="Content Type",
     # )
     # min_word_count = forms.IntegerField(
     #     label="Minimum Word Count", required=False, min_value=0, max_value=10000
@@ -111,14 +123,14 @@ class DefaultSearchForm(forms.Form):
         if topics := self.cleaned_data.get("topics"):
             sqs = sqs.filter(topics__in=topics)
 
+        if content_type := self.cleaned_data.get("content_type"):
+            sqs = sqs.filter(django_ct__in=content_type)
+
         # if start_date := self.cleaned_data.get("start_date"):
         #     sqs = sqs.filter(publish_date__gte=start_date)
 
         # if end_date := self.cleaned_data.get("end_date"):
         #     sqs = sqs.filter(publish_date__lte=end_date)
-
-        # if content_type := self.cleaned_data.get("content_type"):
-        #     sqs = sqs.filter(django_ct__in=content_type)
 
         # if min_word_count := self.cleaned_data.get("min_word_count"):
         #     sqs = sqs.filter(word_count__gte=min_word_count)
