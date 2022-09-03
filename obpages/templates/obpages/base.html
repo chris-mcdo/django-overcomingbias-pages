@@ -69,7 +69,7 @@
                     {% block search_bar %}
                         <li class="nav-search">
                             <form role="search" method="get" action="{% url "search" %}">
-                                <input type="search" name="query" placeholder="Search content...">
+                                <input type="search" name="query" placeholder="Search content..."{% if query %} value={{ query }}{% endif %}>
                                 <button type="submit">Go</button>
                             </form>
                         </li>

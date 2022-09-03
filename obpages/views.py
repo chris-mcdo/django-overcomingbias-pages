@@ -128,6 +128,7 @@ class ContentSearchView(SearchView):
     form_class = DefaultSearchForm
     context_object_name = "search_results"
     extra_context = {"title": "Search"}
+    search_field = "query"
 
     def form_invalid(self, form):
         # Do not show results for invalid form
