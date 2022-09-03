@@ -433,6 +433,17 @@ class SequenceUpdateView(LoginRequiredMixin, UpdateView):
             kwargs.update({"instance": self.model(owner=self.request.user)})
         return kwargs
 
+    def form_valid(self, form):
+        """If the form is valid, save the associated model."""
+        obj = form.save()
+
+        if "_saveasnew" in self.request.POST:
+            # Copy sequence members to new sequence
+            obj.members.set(self.object.members.all())
+
+        self.object = obj
+        return HttpResponseRedirect(self.get_success_url())
+
 
 class SequenceDeleteView(LoginRequiredMixin, DeleteView):
     template_name = f"{OBPAGES_PAGES_PATH}/sequence_delete.html"
