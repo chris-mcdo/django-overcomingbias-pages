@@ -14,6 +14,7 @@ from django.http import (
 )
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.views.decorators.csrf import requires_csrf_token
 from django.views.decorators.http import require_GET, require_POST
 from django.views.generic import (
     CreateView,
@@ -47,6 +48,8 @@ from obpages.models import (
     UserSequence,
     UserSequenceMember,
 )
+
+ERROR_500_TEMPLATE_NAME = "500.html"
 
 OBPAGES_PAGES_PATH = "obpages"
 
@@ -551,3 +554,12 @@ class UserDetailView(DetailView):
         kwargs = super().get_context_data(**kwargs)
         kwargs["title"] = f"{self.object.username}'s profile"
         return kwargs
+
+
+@requires_csrf_token
+def server_error(request, template_name=ERROR_500_TEMPLATE_NAME):
+    return render(
+        request=request,
+        template_name=template_name,
+        status=500,
+    )
