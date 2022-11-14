@@ -1,6 +1,7 @@
 from django.urls import include, path, register_converter
+from obapi import converters
 
-from . import converters, views
+from obpages import views
 
 register_converter(converters.YoutubeVideoIDConverter, "youtube_id")
 register_converter(converters.SpotifyEpisodeIDConverter, "spotify_id")
