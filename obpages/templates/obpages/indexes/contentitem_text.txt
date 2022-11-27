@@ -1,5 +1,7 @@
+{% load search %}
+
 {% comment %} Body {% endcomment %}
-{{ object.text_plain }} {{ object.sp_description }} {{ object.yt_description }}
+{{ object.text_html|html_to_plaintext }} {{ object.description_html|html_to_plaintext }}
 {% comment %} Aliases {% endcomment %}
 {% for author in object.authors.all %}
     {% for alias in author.aliases.all %}
