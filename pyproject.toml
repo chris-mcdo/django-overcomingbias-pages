@@ -46,6 +46,7 @@ issues = "https://github.com/chris-mcdo/django-overcomingbias-pages/issues"
 [project.optional-dependencies]
 redis = ["redis>=4", "hiredis"]
 elasticsearch = ["elasticsearch>=7,<8"]
+recaptcha = ["google-cloud-recaptcha-enterprise"]
 test = ["pytest", "pytest-django", "python-dotenv"]
 
 [tool.hatch.version]
