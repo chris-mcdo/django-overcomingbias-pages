@@ -48,6 +48,7 @@ from obpages.models import (
     UserSequence,
     UserSequenceMember,
 )
+from obpages.tasks import drop_feedback_if_spam
 
 ERROR_500_TEMPLATE_NAME = "500.html"
 
@@ -115,6 +116,22 @@ class FeedbackView(CreateView):
     def get_success_url(self):
         """Return the URL to redirect to after processing a valid form."""
         return reverse("feedback_done")
+
+    def get_context_data(self, **kwargs):
+        if settings.USE_RECAPTCHA:
+            kwargs["recaptcha_key"] = settings.RECAPTCHA_KEY
+        return super().get_context_data(**kwargs)
+
+    def form_valid(self, form):
+        # save first, then check if it came from a bot and delete
+        # this lets the check be run asynchronously
+        self.object = form.save()
+
+        if settings.USE_RECAPTCHA:
+            recaptcha_token = self.request.POST.get("g-recaptcha-response")
+            drop_feedback_if_spam(self.object.pk, recaptcha_token)
+
+        return HttpResponseRedirect(self.get_success_url())
 
 
 @require_GET

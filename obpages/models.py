@@ -96,6 +96,11 @@ class FeedbackNote(models.Model):
         related_name="feedback_notes",
         help_text="Which user the feedback belongs to.",
     )
+    spam_score = models.FloatField(
+        blank=True,
+        null=True,
+        help_text="How likely the note is spam. 0 means more likely, 1 means less.",
+    )
     no_further_action = models.BooleanField(
         default=False, help_text="Whether the feedback requires further action."
     )
