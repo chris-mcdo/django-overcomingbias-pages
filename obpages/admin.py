@@ -5,6 +5,7 @@ from django.http import HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import path
 from django.utils.decorators import method_decorator
+from django.utils.text import Truncator
 from django.views.decorators.csrf import csrf_protect
 from obapi.admin import OBContentItemAdmin
 from obapi.models import OBContentItem
@@ -23,9 +24,48 @@ from obpages.models import (
 admin.site.register(User, UserAdmin)
 
 
+class SpamScoreListFilter(admin.SimpleListFilter):
+    title = "spam score"
+    parameter_name = "spam_score"
+
+    def lookups(self, request, model_admin):
+        return (
+            ("gt80", ">0.8"),
+            ("gt50", ">0.5"),
+            ("le50", "<=0.5"),
+            ("none", "No Score"),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == "gt80":
+            return queryset.filter(spam_score__gt=0.8)
+        if self.value() == "gt50":
+            return queryset.filter(spam_score__gt=0.5)
+        if self.value() == "lte50":
+            return queryset.filter(spam_score__lte=0.5)
+        if self.value() == "none":
+            return queryset.filter(spam_score=None)
+
+
 @admin.register(FeedbackNote)
 class FeedbackNoteAdmin(admin.ModelAdmin):
     readonly_fields = ("create_timestamp",)
+    list_display = (
+        "__str__",
+        "create_timestamp",
+        "no_further_action",
+        "spam_score",
+        "truncated_text",
+    )
+    list_filter = (
+        "no_further_action",
+        SpamScoreListFilter,
+        ("user", admin.EmptyFieldListFilter),
+    )
+
+    @admin.display(description="Text")
+    def truncated_text(self, obj):
+        return Truncator(obj.feedback).chars(num=50, truncate="...")
 
 
 @admin.register(SearchIndex)
