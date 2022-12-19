@@ -55,5 +55,11 @@ source = "vcs"
 [tool.hatch.build.hooks.vcs]
 version-file = "obpages/_version.py"
 
+[tool.hatch.build.targets.sdist]
+include = ["obpages/", "tests/", "tox.ini", "pytest.ini", "manage.py"]
+
+[tool.hatch.build.targets.wheel]
+include = ["obpages/"]
+
 [tool.isort]
 profile = "black"
