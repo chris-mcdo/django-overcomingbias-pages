@@ -1,0 +1,10 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block extrahead %}
+        {% comment %} Icons {% endcomment %}
+        <link rel="icon" href="{% static "obpages/favicons/favicon-32x32.png" %}" sizes="32x32" type="img/png">
+        <link rel="icon" href="{% static "obpages/favicons/favicon-16x16.png" %}" sizes="16x16" type="img/png">
+        <link rel="apple-touch-icon" href="{% static "obpages/favicons/favicon-180x180.png" %}" sizes="180x180">
+        <link rel="icon" href="{% static "obpages/favicons/favicon.svg" %}" type="image/svg+xml">
+{% endblock %}
