@@ -13,6 +13,7 @@ USE_RECAPTCHA = getattr(django.conf.settings, "USE_RECAPTCHA", False)
 
 if USE_RECAPTCHA:
     try:
+        import google.api_core.exceptions  # type: ignore
         from google.cloud import recaptchaenterprise_v1
     except ModuleNotFoundError:
         raise ModuleNotFoundError(
@@ -75,43 +76,54 @@ def update_search_index(index_pk):
 
 @task()
 def drop_feedback_if_spam(feedback_pk: int, recaptcha_token: str):
-    if USE_RECAPTCHA:
-        # Build client, event, assessment, request
-        client = recaptchaenterprise_v1.RecaptchaEnterpriseServiceClient()
+    if not USE_RECAPTCHA:
+        return
 
-        event = recaptchaenterprise_v1.Event()
-        event.site_key = RECAPTCHA_KEY
-        event.token = recaptcha_token
+    feedback_note = FeedbackNote.objects.get(pk=feedback_pk)
 
-        assessment = recaptchaenterprise_v1.Assessment()
-        assessment.event = event
+    if not recaptcha_token:
+        feedback_note.delete()
+        return
 
-        request = recaptchaenterprise_v1.CreateAssessmentRequest()
-        request.assessment = assessment
-        request.parent = f"projects/{GOOGLE_PROJECT_ID}"
+    # Build client, event, assessment, request
+    client = recaptchaenterprise_v1.RecaptchaEnterpriseServiceClient()
 
-        # collect report from recaptcha server
+    event = recaptchaenterprise_v1.Event()
+    event.site_key = RECAPTCHA_KEY
+    event.token = recaptcha_token
+
+    assessment = recaptchaenterprise_v1.Assessment()
+    assessment.event = event
+
+    request = recaptchaenterprise_v1.CreateAssessmentRequest()
+    request.assessment = assessment
+    request.parent = f"projects/{GOOGLE_PROJECT_ID}"
+
+    # collect report from recaptcha server
+    try:
         response = client.create_assessment(request)
+    except google.api_core.exceptions.GoogleAPIError as exc:
+        feedback_note.delete()
+        raise exc
 
-        feedback_note = FeedbackNote.objects.get(pk=feedback_pk)
-        # is token valid? does it correspond to the right action? is its score
-        # above the threshold?
-        if not response.token_properties.valid:
-            logger.warning("Deleting feedback item due to invalid reCAPTCHA token.")
-            feedback_note.delete()
-        elif response.token_properties.action != "submit":
-            logger.warning(
-                "Deleting feedback item with unknown action"
-                f" {response.token_properties.action}."
-            )
-            feedback_note.delete()
-        elif response.risk_analysis.score < SPAM_SCORE_THRESHOLD:
-            logger.warning(
-                "Deleting feedback item due to spam score less than threshold"
-                f" ({response.risk_analysis.score}<{SPAM_SCORE_THRESHOLD})."
-            )
-            feedback_note.delete()
-        else:
-            # if yes, record its spam score
-            feedback_note.spam_score = response.risk_analysis.score
-            feedback_note.save()
+    # is token valid? does it correspond to the right action? is its score
+    # above the threshold?
+    if not response.token_properties.valid:
+        logger.warning("Deleting feedback item due to invalid reCAPTCHA token.")
+        feedback_note.delete()
+    elif response.token_properties.action != "submit":
+        logger.warning(
+            "Deleting feedback item with unknown action"
+            f" {response.token_properties.action}."
+        )
+        feedback_note.delete()
+    elif response.risk_analysis.score < SPAM_SCORE_THRESHOLD:
+        logger.warning(
+            "Deleting feedback item due to spam score less than threshold"
+            f" ({response.risk_analysis.score}<{SPAM_SCORE_THRESHOLD})."
+        )
+        feedback_note.delete()
+    else:
+        # if yes, record its spam score
+        feedback_note.spam_score = response.risk_analysis.score
+        feedback_note.save()
