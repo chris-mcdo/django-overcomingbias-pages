@@ -1,7 +1,5 @@
 import datetime
-from typing import Callable, Optional
 
-import django.db.models
 from obapi.models import (
     ContentItem,
     EssayContentItem,
@@ -19,17 +17,11 @@ _PROTECTED_TYPES = (datetime.datetime, str, int, float, bool, type(None))
 class MeiliSerializer:
     """Serialize a QuerySet of objects for indexing by MeiliSearch."""
 
-    def __init__(
-        self,
-        model_fields: tuple[django.db.models.Field],
-        custom_fields: Optional[
-            dict[str, tuple[Optional[django.db.models.Field], Callable]]
-        ] = None,
-    ):
+    def __init__(self, model_fields, custom_fields=None):
         self.model_fields = model_fields
         self.custom_fields = custom_fields or {}
 
-    def serialize(self, queryset: django.db.models.QuerySet):
+    def serialize(self, queryset):
         """Serialize a QuerySet of objects."""
         objects = []
         for obj in queryset:
@@ -43,9 +35,7 @@ class MeiliSerializer:
             objects.append(data)
         return objects
 
-    def serialize_field(
-        self, obj: django.db.models.Model, field: django.db.models.Field
-    ):
+    def serialize_field(self, obj, field):
         """Handle serialization of a particular field."""
         if field.many_to_many:
             return self.handle_m2m_field(obj, field)
@@ -70,11 +60,11 @@ class MeiliSerializer:
 
 
 # Custom handlers ----------------------------------------------------------------------
-def handle_html(obj: django.db.models.Model, field: django.db.models.Field):
+def handle_html(obj, field):
     return obpages.utils.html_to_plaintext(field.value_to_string(obj))
 
 
-def get_content_type(obj: django.db.models.Model, field: django.db.models.Field):
+def get_content_type(obj, field):
     assert field is None
     return obj._meta.verbose_name_plural.title()
 

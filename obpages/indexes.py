@@ -1,6 +1,5 @@
 import math
 import time
-from typing import Any, Optional
 
 import django.apps
 import django.conf
@@ -21,8 +20,8 @@ class DummyIndex:
 
     def __init__(
         self,
-        search_model: str = DUMMY_SEARCH_MODEL,
-        search_field: str = DUMMY_SEARCH_FIELD,
+        search_model=DUMMY_SEARCH_MODEL,
+        search_field=DUMMY_SEARCH_FIELD,
     ):
         self.search_model = django.apps.apps.get_model(search_model)
         self.search_field = search_field
@@ -33,9 +32,7 @@ class DummyIndex:
     def delete(self):
         raise NotImplementedError
 
-    def search(
-        self, query: str, opt_params: Optional[dict[str, Any]] = None
-    ) -> dict[str, Any]:
+    def search(self, query, opt_params=None):
         # read and validate parameters
         opt_params = opt_params or {}
         page = opt_params.get("page", 1)

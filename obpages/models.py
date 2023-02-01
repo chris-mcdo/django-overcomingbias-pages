@@ -1,6 +1,5 @@
 import functools
 import logging
-from typing import Optional
 
 import django.conf
 import django.utils.timezone
@@ -13,7 +12,6 @@ from obapi.modelfields import SimpleSlugField
 from obapi.models import BaseSequence, BaseSequenceMember, ContentItem
 
 import obpages.indexes
-import obpages.serialize
 from obpages.utils import to_slug
 
 logger = logging.getLogger(__name__)
@@ -107,10 +105,7 @@ class SearchIndex(models.Model):
         return self._index.search(query, opt_params)
 
     def update_meili_index(
-        self,
-        serializers: dict[models.Model, obpages.serialize.MeiliSerializer],
-        querysets: Optional[dict[models.Model, models.QuerySet]] = None,
-        timestamp_field: str = "update_timestamp",
+        self, serializers, querysets=None, timestamp_field="update_timestamp"
     ):
         initial_timestamp = django.utils.timezone.now()
         for Model, serializer in serializers.items():
@@ -123,12 +118,7 @@ class SearchIndex(models.Model):
         self.update_timestamp = initial_timestamp
         self.save(update_fields=["update_timestamp"])
 
-    def index_objects(
-        self,
-        serializer: obpages.serialize.MeiliSerializer,
-        queryset: models.QuerySet,
-        chunk_size: int = 1000,
-    ):
+    def index_objects(self, serializer, queryset, chunk_size=1000):
         num_objects = queryset.count()
         for i in range(0, num_objects, chunk_size):
             objs = queryset[i : i + chunk_size]
