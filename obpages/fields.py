@@ -1,9 +1,9 @@
-from django import forms
+import django.forms
 from django.core.exceptions import ValidationError
 
 
-class CustomModelMultipleChoiceField(forms.ModelMultipleChoiceField):
-    """Model Multiple Choice Field which normalizes to a set of primary keys."""
+class CustomModelMultipleChoiceField(django.forms.ModelMultipleChoiceField):
+    """Model Multiple Choice Field which normalizes to a set of object names."""
 
     def clean(self, value):
         value = self.prepare_value(value)
@@ -24,8 +24,8 @@ class CustomModelMultipleChoiceField(forms.ModelMultipleChoiceField):
 
     def _check_values(self, value):
         """
-        Given a list of possible PK values, return a list of the
-        corresponding object slugs. Raise a ValidationError if a given value is
+        Given a list of possible PK values, return a set of the
+        corresponding object names. Raise a ValidationError if a given value is
         invalid (not a valid PK, not in the queryset, etc.)
         """
         key = self.to_field_name or "pk"
@@ -57,7 +57,8 @@ class CustomModelMultipleChoiceField(forms.ModelMultipleChoiceField):
                     code="invalid_choice",
                     params={"value": val},
                 )
-        return pks
+        values = {str(o) for o in qs}
+        return values
 
 
 class ClassifierMultipleChoiceField(CustomModelMultipleChoiceField):
@@ -68,7 +69,7 @@ class ClassifierMultipleChoiceField(CustomModelMultipleChoiceField):
         super().__init__(queryset=model.objects.all(), **kwargs)
 
 
-class SortOptionsField(forms.ChoiceField):
+class SortOptionsField(django.forms.ChoiceField):
     """ChoiceField which normalizes data to a custom value."""
 
     def __init__(self, *, options=(), **kwargs):
@@ -79,18 +80,3 @@ class SortOptionsField(forms.ChoiceField):
     def clean(self, value):
         clean_data = super().clean(value)
         return self.raw_names.get(clean_data, "")
-
-
-class ContentMultipleChoiceField(forms.MultipleChoiceField):
-    def __init__(self, models, **kwargs):
-        options = {
-            model.site_name().lower(): (model.site_name(), model._meta.label_lower)
-            for model in models
-        }
-        choices = [(value, names[0]) for value, names in options.items()]
-        super().__init__(choices=choices, **kwargs)
-        self.raw_names = {value: names[1] for value, names in options.items()}
-
-    def clean(self, value):
-        clean_data = super().clean(value)
-        return {self.raw_names[field] for field in clean_data}

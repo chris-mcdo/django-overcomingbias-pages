@@ -1,12 +1,7 @@
+import meilisearch.errors
 from django.contrib import admin, messages
 from django.contrib.auth.admin import UserAdmin
-from django.core.exceptions import PermissionDenied, SuspiciousOperation
-from django.http import HttpResponseRedirect
-from django.template.response import TemplateResponse
-from django.urls import path
-from django.utils.decorators import method_decorator
 from django.utils.text import Truncator
-from django.views.decorators.csrf import csrf_protect
 from obapi.admin import OBContentItemAdmin
 from obapi.models import OBContentItem
 from ordered_model.admin import OrderedInlineModelAdminMixin, OrderedTabularInline
@@ -70,63 +65,72 @@ class FeedbackNoteAdmin(admin.ModelAdmin):
 
 @admin.register(SearchIndex)
 class SearchIndexAdmin(admin.ModelAdmin):
-    manage_search_template = "admin/obpages/manage_search.html"
 
-    def get_urls(self):
-        return [
-            path(
-                "",
-                self.admin_site.admin_view(self.manage_search_view),
-                name="obpages_searchindex_changelist",
-            )
-        ]
+    list_display = ("index_uid", "update_timestamp")
+    actions = ["create_index", "delete_index", "update_index"]
 
-    @method_decorator(csrf_protect)
-    def manage_search_view(self, request):
-        # (1) Check permissions
-        if not self.has_module_permission(request):
-            raise PermissionDenied
-
-        # (2)
-        opts = self.model._meta
-
-        if request.method == "POST":
-            # Configure action
-            if "_update" in request.POST:
-                required_permission = "obpages.update_search_index"
-                searchindex_task = obpages.tasks.update_search_index
-                success_message = "Updating search index. This may take a while..."
-            elif "_rebuild" in request.POST:
-                required_permission = "obpages.rebuild_search_index"
-                searchindex_task = obpages.tasks.rebuild_search_index
-                success_message = "Rebuilding search index. This may take a while..."
+    @admin.action(
+        permissions=["change"],
+        description="Create MeiliSearch index for selected indexes",
+    )
+    def create_index(self, request, queryset):
+        for index in queryset:
+            try:
+                index.create_meili_index()
+            except meilisearch.errors.MeiliSearchError as exc:
+                self.message_user(
+                    request,
+                    f'Error creating "{index.index_uid}". {exc.message}',
+                    messages.ERROR,
+                )
             else:
-                raise SuspiciousOperation
+                self.message_user(
+                    request,
+                    f'Successfully created Meili index "{index.index_uid}".',
+                    messages.SUCCESS,
+                )
 
-            # Execute action
-            if not request.user.has_perm(required_permission):
-                raise PermissionDenied
+    @admin.action(
+        permissions=["change"],
+        description="Delete MeiliSearch index for selected indexes",
+    )
+    def delete_index(self, request, queryset):
+        for index in queryset:
+            try:
+                index.delete_meili_index()
+            except meilisearch.errors.MeiliSearchError as exc:
+                self.message_user(
+                    request,
+                    f'Error deleting "{index.index_uid}". {exc.message}',
+                    messages.ERROR,
+                )
+            else:
+                self.message_user(
+                    request,
+                    f'Successfully deleted Meili index "{index.index_uid}".',
+                    messages.SUCCESS,
+                )
 
-            # Run task
-            searchindex_task()
-            self.message_user(request, message=success_message, level=messages.INFO)
-
-        context = {
-            **self.admin_site.each_context(request),
-            "module_name": str(opts.verbose_name_plural),
-            "title": "Search Index Management",
-            "subtitle": None,
-            "is_popup": False,
-            "opts": opts,
-        }
-
-        request.current_app = self.admin_site.name
-
-        # Prevent form resubmission if page is refreshed
-        if request.method == "POST":
-            return HttpResponseRedirect(request.get_full_path())
-
-        return TemplateResponse(request, self.manage_search_template, context)
+    @admin.action(
+        permissions=["change"],
+        description="Update indexes with new / modified documents",
+    )
+    def update_index(self, request, queryset):
+        for index in queryset:
+            try:
+                obpages.tasks.update_search_index(index.pk)
+            except meilisearch.errors.MeiliSearchError as exc:
+                self.message_user(
+                    request,
+                    f'Error updating Meili index "{index.index_uid}". {exc.message}',
+                    messages.ERROR,
+                )
+            else:
+                self.message_user(
+                    request,
+                    f'Attempting to update Meili index "{index.index_uid}".',
+                    messages.INFO,
+                )
 
 
 class UserSequenceMemberInline(OrderedTabularInline):

@@ -35,14 +35,6 @@ def query_results(
     }
 
 
-@register.inclusion_tag(f"{OBPAGES_SECTIONS_PATH}/search_results.html")
-def search_results(search_results, title=None, max_results=None, is_staff=False):
-    if max_results is not None:
-        search_results = search_results[0:max_results]
-
-    return {"search_results": search_results, "title": title, "is_staff": is_staff}
-
-
 @register.inclusion_tag(f"{OBPAGES_SECTIONS_PATH}/explore_section.html")
 def explore_section(model_name, max_results=None):
     model_class = apps.get_model("obapi", model_name)

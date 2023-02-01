@@ -11,7 +11,6 @@ INSTALLED_APPS = [
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "huey.contrib.djhuey",
-    "haystack",
     "ordered_model",
     "obapi",
     "obpages",
@@ -75,14 +74,8 @@ HUEY = {
 }
 
 
-# Haystack settings
-# Ignore haystack for now
-
-HAYSTACK_CONNECTIONS = {
-    "default": {
-        "ENGINE": "haystack.backends.simple_backend.SimpleEngine",
-    },
-}
+# Search settings
+MEILISEARCH_INDEX = "content"
 
 # OB Pages
 

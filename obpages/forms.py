@@ -1,10 +1,8 @@
+import django.forms
 import django_select2.forms
-from django import forms
-from django.core.exceptions import ValidationError
+import obapi.formfields
 from django.utils.html import format_html
-from haystack.query import SQ, AutoQuery, SearchQuerySet
-from obapi.formfields import PandocWriterField
-from obapi.models import (  # OBContentItem, SpotifyContentItem, YoutubeContentItem,
+from obapi.models import (
     Author,
     EssayContentItem,
     Idea,
@@ -14,11 +12,8 @@ from obapi.models import (  # OBContentItem, SpotifyContentItem, YoutubeContentI
     YoutubeContentItem,
 )
 
-from obpages.fields import (  # ContentMultipleChoiceField,
-    ClassifierMultipleChoiceField,
-    ContentMultipleChoiceField,
-    SortOptionsField,
-)
+import obpages.fields
+import obpages.utils
 from obpages.models import UserSequence, UserSequenceMember
 
 
@@ -29,172 +24,87 @@ def render_js(self):
     ]
 
 
-forms.widgets.Media.render_js = render_js
+django.forms.widgets.Media.render_js = render_js
+
+SORT_OPTIONS = {
+    "relevance": ("Relevance", None),
+    "alphabetical": ("Title", "title:asc"),
+    "newest": ("Newest First", "publish_date:desc"),
+    "oldest": ("Oldest First", "publish_date:asc"),
+}
+
+MODEL_SEARCH_CHOICES = [
+    (model._meta.verbose_name_plural.title(), model._meta.verbose_name_plural.title())
+    for model in (
+        EssayContentItem,
+        SpotifyContentItem,
+        YoutubeContentItem,
+        OBContentItem,
+    )
+]
 
 
-class DefaultSearchForm(forms.Form):
-    query = forms.CharField(
+class ContentSearchForm(django.forms.Form):
+    query = django.forms.CharField(
         required=False,
         label="Search",
-        widget=forms.HiddenInput,
+        widget=django.forms.HiddenInput,
     )
 
-    sort = SortOptionsField(
-        options={
-            # important NOTE: "_score" is ElasticSearch-specific!
-            "relevance": ("Relevance", "-_score"),
-            "alphabetical": ("Title", "slug"),
-            "newest": ("Newest First", "-publish_date"),
-            "oldest": ("Oldest First", "publish_date"),
-        },
+    sort = obpages.fields.SortOptionsField(
+        options=SORT_OPTIONS,
         required=False,
         label="Sort By",
-        widget=forms.Select(attrs={"onchange": "this.form.submit()"}),
+        widget=django.forms.Select(attrs={"onchange": "this.form.submit()"}),
     )
-    authors = ClassifierMultipleChoiceField(
+    authors = obpages.fields.ClassifierMultipleChoiceField(
         Author, widget=django_select2.forms.Select2MultipleWidget
     )
-    ideas = ClassifierMultipleChoiceField(
+    ideas = obpages.fields.ClassifierMultipleChoiceField(
         Idea, widget=django_select2.forms.Select2MultipleWidget
     )
-    topics = ClassifierMultipleChoiceField(
+    topics = obpages.fields.ClassifierMultipleChoiceField(
         Topic, widget=django_select2.forms.Select2MultipleWidget
     )
-    content_type = ContentMultipleChoiceField(
-        models=(
-            EssayContentItem,
-            SpotifyContentItem,
-            YoutubeContentItem,
-            OBContentItem,
-        ),
+    content_type = django.forms.MultipleChoiceField(
+        choices=MODEL_SEARCH_CHOICES,
         required=False,
-        label="Content Type",
         widget=django_select2.forms.Select2MultipleWidget,
+        label="Content Type",
     )
 
-    # start_date = forms.DateTimeField(
-    #     required=False,
-    #     label="Start Date",
-    #     widget=forms.DateInput(attrs={"type": "date"}),
-    # )
-    # end_date = forms.DateTimeField(
-    #     required=False,
-    #     label="End Date",
-    #     widget=forms.DateInput(attrs={"type": "date"}),
-    # )
-    # min_word_count = forms.IntegerField(
-    #     label="Minimum Word Count", required=False, min_value=0, max_value=10000
-    # )
-    # max_word_count = forms.IntegerField(
-    #     label="Maximum Word Count", required=False, min_value=0, max_value=10000
-    # )
-    # min_duration = forms.DurationField(label="Minimum Duration", required=False)
-    # max_duration = forms.DurationField(label="Maximum Duration", required=False)
+    def get_query(self):
 
-    def __init__(self, *args, **kwargs):
-        self.searchqueryset = kwargs.pop("searchqueryset", None)
-        self.load_all = kwargs.pop("load_all", False)
+        query = self.cleaned_data.get("query")
+        opt_params = {}
 
-        if self.searchqueryset is None:
-            self.searchqueryset = SearchQuerySet()
-
-        super().__init__(*args, **kwargs)
-
-    def search(self):
-        if not self.is_valid():
-            return self.no_query_found()
-
-        sqs = self.searchqueryset
-
-        if query := self.cleaned_data.get("query"):
-            sqs = sqs.filter(SQ(content=AutoQuery(query)) | SQ(title=AutoQuery(query)))
+        def add_filter(orig_params, filter_name, filter_values):
+            orig_filters = orig_params.get("filter", [])
+            new_filters = [
+                f"{filter_name} = '{obpages.utils.escape_single_quotes(value)}'"
+                for value in filter_values
+            ]
+            return orig_filters + [new_filters]
 
         if order_field := self.cleaned_data.get("sort"):
-            sqs = sqs.order_by(order_field)
+            opt_params["sort"] = [order_field]
         elif not query:
-            sqs = sqs.order_by("-publish_date")
+            opt_params["sort"] = [SORT_OPTIONS["newest"][1]]
 
-        if authors := self.cleaned_data.get("authors"):
-            sqs = sqs.filter(authors__in=authors)
+        for filter_name in ["authors", "ideas", "topics", "content_type"]:
+            if filter_values := self.cleaned_data.get(filter_name):
+                opt_params["filter"] = add_filter(
+                    opt_params, filter_name, filter_values
+                )
 
-        if ideas := self.cleaned_data.get("ideas"):
-            sqs = sqs.filter(ideas__in=ideas)
-
-        if topics := self.cleaned_data.get("topics"):
-            sqs = sqs.filter(topics__in=topics)
-
-        if content_type := self.cleaned_data.get("content_type"):
-            sqs = sqs.filter(django_ct__in=content_type)
-
-        # if start_date := self.cleaned_data.get("start_date"):
-        #     sqs = sqs.filter(publish_date__gte=start_date)
-
-        # if end_date := self.cleaned_data.get("end_date"):
-        #     sqs = sqs.filter(publish_date__lte=end_date)
-
-        # if min_word_count := self.cleaned_data.get("min_word_count"):
-        #     sqs = sqs.filter(word_count__gte=min_word_count)
-
-        # if max_word_count := self.cleaned_data.get("max_word_count"):
-        #     sqs = sqs.filter(word_count__lte=max_word_count)
-
-        # if min_duration := self.cleaned_data.get("min_duration"):
-        #     sqs = sqs.filter(duration__gte=min_duration.total_seconds())
-
-        # if max_duration := self.cleaned_data.get("max_duration"):
-        #     sqs = sqs.filter(duration__lte=max_duration.total_seconds())
-
-        if self.load_all:
-            sqs = sqs.load_all()
-
-        return sqs
-
-    def no_query_found(self):
-        return self.searchqueryset.all()
-
-    def clean(self):
-        cleaned_data = super().clean()
-
-        # Date range
-        # self.validate_range(
-        #     cleaned_data,
-        #     "start_date",
-        #     "end_date",
-        #     message="End date must be after start date.",
-        # )
-        # self.validate_range(
-        #     cleaned_data,
-        #     "min_word_count",
-        #     "max_word_count",
-        #     message="Minimum word count must be less than maximum word count.",
-        # )
-        # self.validate_range(
-        #     cleaned_data,
-        #     "min_duration",
-        #     "max_duration",
-        #     message="Minimum duration must be less than maximum duration.",
-        # )
-
-        return cleaned_data
-
-    def validate_range(self, cleaned_data, lower_field, upper_field, message=None):
-        """Ensure the value of one field is more than another."""
-        lower = cleaned_data.get(lower_field)
-        upper = cleaned_data.get(upper_field)
-        if lower and upper and lower > upper:
-            if message is None:
-                message = f"{lower_field} must be less than {upper_field}."
-            raise ValidationError(
-                message,
-                code="invalid",
-            )
+        return query, opt_params
 
 
-class SequenceExportForm(forms.Form):
-    writer = PandocWriterField(label="Export To", initial="epub")
+class SequenceExportForm(django.forms.Form):
+    writer = obapi.formfields.PandocWriterField(label="Export To", initial="epub")
 
 
-class SequenceChangeForm(forms.ModelForm):
+class SequenceChangeForm(django.forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["abstract"].widget.attrs.pop("cols")
@@ -210,7 +120,7 @@ class SequenceChangeForm(forms.ModelForm):
         return exclude
 
 
-class SequenceMemberMoveForm(forms.Form):
+class SequenceMemberMoveForm(django.forms.Form):
     SEQUENCEMEMBER_MOVE_CHOICES = [
         ("top", "Top"),
         ("up", "Up"),
@@ -218,10 +128,10 @@ class SequenceMemberMoveForm(forms.Form):
         ("bottom", "Bottom"),
     ]
 
-    move = forms.ChoiceField(choices=SEQUENCEMEMBER_MOVE_CHOICES)
+    move = django.forms.ChoiceField(choices=SEQUENCEMEMBER_MOVE_CHOICES)
 
 
-class UserSequenceMemberAddForm(forms.ModelForm):
+class UserSequenceMemberAddForm(django.forms.ModelForm):
     def __init__(self, user, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["sequence"].queryset = user.sequences.all()

@@ -1,5 +1,5 @@
 {% extends "obpages/base.html" %}
-{% load more_like_this sections widgets links utils %}
+{% load sections widgets links utils %}
 
 {% block meta_description %}View {{ item|verbose_name }} {{ item.title }} on overcomingbias-collection.{% endblock %}
 
@@ -44,7 +44,7 @@
     {% endif %}
     {% query_results query_results=item.internal_links.select_subclasses title="Mentions" max_results=max_results is_staff=user.is_staff %}
     {% query_results query_results=item.internal_pingbacks.select_subclasses title="Mentioned By" max_results=max_results is_staff=user.is_staff %}
-    {% more_like_this item as related_content %}
-    {% search_results search_results=related_content title="More Like This" max_results=max_results is_staff=user.is_staff %}
+    {% comment %} {% more_like_this item as related_content %}
+    {% query_results query_results=related_content title="More Like This" max_results=max_results is_staff=user.is_staff %} {% endcomment %}
 {% endblock %}
 

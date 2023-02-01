@@ -13,8 +13,7 @@ The main features are:
   `YouTube <https://www.youtube.com/>`_, `Spotify <https://spotify.com/>`_
   and more) via the admin site.
 
-- Search content with
-  `django-haystack <https://django-haystack.readthedocs.io/en/master/>`_.
+- Search content with `meilisearch <https://www.meilisearch.com/>`_.
 
 - Create sequences (series) of content and export them to PDF, epub, plaintext,
   or any other format supported by `pandoc <https://pandoc.org/>`_.
@@ -43,8 +42,6 @@ To configure ``django-overcomingbias-pages``, add the following to your settings
     # django-overcomingbias-api
     "ordered_model",
     "obapi",
-    # haystack search
-    "haystack",
     # async tasks
     "huey.contrib.djhuey",
     # django-overcomingbias-pages
@@ -57,21 +54,22 @@ To configure ``django-overcomingbias-pages``, add the following to your settings
   AUTH_USER_MODEL = "obpages.User"
 
 
-To configure search, follow the instructions on the
-`haystack <https://django-haystack.readthedocs.io/en/master/>`_
-doc pages.
-If you don't care about search, just add this to your settings:
+Search is provided using ``meilisearch``.
+To configure search, first set up a MeiliSearch instance, and then set up the following
+settings:
 
 .. code-block:: python
 
   # settings.py
 
-  # dummy backend for django-haystack
-  HAYSTACK_CONNECTIONS = {
-    "default": {
-      "ENGINE": "haystack.backends.simple_backend.SimpleEngine",
-    },
+  MEILISEARCH_CLIENT = {
+      "url": "http://127.0.0.1:7700",
   }
+  MEILISEARCH_INDEX = "content"
+
+``MEILISEARCH_CLIENT`` specifies the location of the MeiliSearch instance, while
+``MEILISEARCH_INDEX`` controls which MeiliSearch index is used for search.
+Indexes can be created, updated and deleted via the admin site.
 
 ``django-overcomingbias-pages`` uses `Huey <https://github.com/coleifer/huey>`_ to
 run tasks asynchronously.

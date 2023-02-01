@@ -30,7 +30,7 @@ classifiers = [
 ]
 dependencies = [
     "Django>=4.0,<5",
-    "django-haystack>=3.2,<4",
+    "meilisearch",
     "huey>=2",
     "python-slugify>=5",
     "django-select2",
@@ -45,9 +45,9 @@ issues = "https://github.com/chris-mcdo/django-overcomingbias-pages/issues"
 
 [project.optional-dependencies]
 redis = ["redis>=4", "hiredis"]
-elasticsearch = ["elasticsearch>=7,<8"]
 recaptcha = ["google-cloud-recaptcha-enterprise"]
 test = ["pytest", "pytest-django", "python-dotenv"]
+production = ["django-overcomingbias-pages[redis,recaptcha]"]
 
 [tool.hatch.version]
 source = "vcs"

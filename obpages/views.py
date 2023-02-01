@@ -1,10 +1,11 @@
 import random
 
+import django.conf
 import obapi.export
 from django.apps import apps
-from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.paginator import InvalidPage
 from django.db.models import Count
 from django.http import (
     Http404,
@@ -21,21 +22,22 @@ from django.views.generic import (
     DeleteView,
     DetailView,
     ListView,
+    TemplateView,
     UpdateView,
     View,
 )
 from django.views.generic.edit import FormMixin
-from haystack.generic_views import SearchView
-from haystack.query import EmptySearchQuerySet
 from obapi.models import (
+    ContentItem,
     EssayContentItem,
     OBContentItem,
     SpotifyContentItem,
     YoutubeContentItem,
 )
 
+import obpages.paginator
 from obpages.forms import (
-    DefaultSearchForm,
+    ContentSearchForm,
     SequenceChangeForm,
     SequenceExportForm,
     SequenceMemberMoveForm,
@@ -44,6 +46,7 @@ from obpages.forms import (
 from obpages.models import (
     CuratedContentItem,
     FeedbackNote,
+    SearchIndex,
     User,
     UserSequence,
     UserSequenceMember,
@@ -54,8 +57,13 @@ ERROR_500_TEMPLATE_NAME = "500.html"
 
 OBPAGES_PAGES_PATH = "obpages"
 
-RESULTS_PER_PAGE = getattr(settings, "OBPAGES_RESULTS_PER_PAGE", 20)
-RESULTS_PER_SECTION = getattr(settings, "OBPAGES_RESULTS_PER_SECTION", 5)
+RESULTS_PER_PAGE = getattr(django.conf.settings, "OBPAGES_RESULTS_PER_PAGE", 20)
+RESULTS_PER_SECTION = getattr(django.conf.settings, "OBPAGES_RESULTS_PER_SECTION", 5)
+MEILISEARCH_INDEX = getattr(django.conf.settings, "MEILISEARCH_INDEX", "default")
+
+USE_RECAPTCHA = getattr(django.conf.settings, "USE_RECAPTCHA", False)
+if USE_RECAPTCHA:
+    RECAPTCHA_KEY = django.conf.settings.RECAPTCHA_KEY
 
 
 @require_GET
@@ -118,8 +126,8 @@ class FeedbackView(CreateView):
         return reverse("feedback_done")
 
     def get_context_data(self, **kwargs):
-        if settings.USE_RECAPTCHA:
-            kwargs["recaptcha_key"] = settings.RECAPTCHA_KEY
+        if USE_RECAPTCHA:
+            kwargs["recaptcha_key"] = RECAPTCHA_KEY
         return super().get_context_data(**kwargs)
 
     def form_valid(self, form):
@@ -127,7 +135,7 @@ class FeedbackView(CreateView):
         # this lets the check be run asynchronously
         self.object = form.save()
 
-        if settings.USE_RECAPTCHA:
+        if USE_RECAPTCHA:
             recaptcha_token = self.request.POST.get("g-recaptcha-response")
             drop_feedback_if_spam(self.object.pk, recaptcha_token)
 
@@ -140,17 +148,73 @@ def feedback_done(request):
     return render(request, f"{OBPAGES_PAGES_PATH}/feedback_done.html", context)
 
 
-class ContentSearchView(SearchView):
+class ContentSearchView(TemplateView):
     template_name = f"{OBPAGES_PAGES_PATH}/search.html"
-    form_class = DefaultSearchForm
-    context_object_name = "search_results"
+    form_class = ContentSearchForm
+    model = ContentItem
+    paginate_by = RESULTS_PER_PAGE
     extra_context = {"title": "Search"}
     search_field = "query"
+    page_kwarg = "page"
+
+    def get(self, request, *args, **kwargs):
+        """
+        Handles GET requests and instantiates a blank version of the form.
+        """
+        form = ContentSearchForm(data=request.GET)
+
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+
+    def form_valid(self, form):
+        index = SearchIndex.objects.get(pk=MEILISEARCH_INDEX)
+        queryset = ContentItem.objects.select_subclasses()
+        query, opt_params = form.get_query()
+        print(f"Query looks like {query}, with params {opt_params}")
+        paginator = obpages.paginator.MeiliPaginator(
+            index=index,
+            queryset=queryset,
+            query=query,
+            opt_params=opt_params,
+            per_page=self.paginate_by,
+        )
+
+        paginator, page, object_list, is_paginated = self.get_page(paginator)
+
+        context = self.get_context_data(
+            **{
+                "form": form,
+                "query": query,
+                "paginator": paginator,
+                "page_obj": page,
+                "is_paginated": is_paginated,
+                "object_list": object_list,
+            }
+        )
+        return self.render_to_response(context)
+
+    def get_page(self, paginator):
+        page_kwarg = self.page_kwarg
+        page = self.kwargs.get(page_kwarg) or self.request.GET.get(page_kwarg) or 1
+        try:
+            page_number = int(page)
+        except ValueError:
+            raise Http404("Page cannot it be converted to an int.")
+        try:
+            page = paginator.page(page_number)
+            return (paginator, page, page.object_list, page.has_other_pages())
+        except InvalidPage as e:
+            raise Http404(
+                "Invalid page (%(page_number)s): %(message)s"
+                % {"page_number": page_number, "message": str(e)}
+            )
 
     def form_invalid(self, form):
         # Do not show results for invalid form
         context = self.get_context_data(
-            **{self.form_name: form, "object_list": EmptySearchQuerySet()}
+            **{"form": form, "object_list": ContentItem.objects.none()}
         )
         return self.render_to_response(context)
 

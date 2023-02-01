@@ -1,24 +1,33 @@
 import logging
 
-from django.conf import settings
+import django.conf
 from django.contrib.admin.models import CHANGE, LogEntry
 from django.contrib.contenttypes.models import ContentType
-from django.core.management import call_command
 from huey.contrib.djhuey import task
 from obapi.models import OBContentItem
 
-from obpages.models import FeedbackNote
+import obpages.serialize
+from obpages.models import FeedbackNote, SearchIndex
 
-if settings.USE_RECAPTCHA:
+USE_RECAPTCHA = getattr(django.conf.settings, "USE_RECAPTCHA", False)
+
+if USE_RECAPTCHA:
     try:
         from google.cloud import recaptchaenterprise_v1
     except ModuleNotFoundError:
         raise ModuleNotFoundError(
             "The google-cloud-recaptcha-enterprise package is required"
-            " if using reCAPTCHA"
+            " if using reCAPTCHA."
         )
-
-SPAM_SCORE_THRESHOLD = getattr(settings, "SPAM_SCORE_THRESHOLD", 0.0)
+    try:
+        RECAPTCHA_KEY = django.conf.settings.RECAPTCHA_KEY
+        GOOGLE_PROJECT_ID = django.conf.settings.GOOGLE_PROJECT_ID
+    except AttributeError:
+        raise AttributeError(
+            "You must provide the ``RECAPTCHA_KEY`` and"
+            " ``GOOGLE_PROJECT_ID`` settings if using reCAPTCHA."
+        )
+    SPAM_SCORE_THRESHOLD = getattr(django.conf.settings, "SPAM_SCORE_THRESHOLD", 0.0)
 
 logger = logging.getLogger(__name__)
 
@@ -57,27 +66,21 @@ def update_edited_items(user_pk=None):
 
 
 @task()
-def update_search_index():
-    action = "update_index"
-    args = ["--remove"]
-    call_command(action, *args)
-
-
-@task()
-def rebuild_search_index():
-    action = "rebuild_index"
-    args = ["--noinput"]
-    call_command(action, *args)
+def update_search_index(index_pk):
+    selected_index = SearchIndex.objects.get(pk=index_pk)
+    selected_index.update_meili_index(
+        obpages.serialize.CONTENT_SERIALIZERS, obpages.serialize.CONTENT_QUERYSETS
+    )
 
 
 @task()
 def drop_feedback_if_spam(feedback_pk: int, recaptcha_token: str):
-    if settings.USE_RECAPTCHA:
+    if USE_RECAPTCHA:
         # Build client, event, assessment, request
         client = recaptchaenterprise_v1.RecaptchaEnterpriseServiceClient()
 
         event = recaptchaenterprise_v1.Event()
-        event.site_key = settings.RECAPTCHA_KEY
+        event.site_key = RECAPTCHA_KEY
         event.token = recaptcha_token
 
         assessment = recaptchaenterprise_v1.Assessment()
@@ -85,7 +88,7 @@ def drop_feedback_if_spam(feedback_pk: int, recaptcha_token: str):
 
         request = recaptchaenterprise_v1.CreateAssessmentRequest()
         request.assessment = assessment
-        request.parent = f"projects/{settings.GOOGLE_PROJECT_ID}"
+        request.parent = f"projects/{GOOGLE_PROJECT_ID}"
 
         # collect report from recaptcha server
         response = client.create_assessment(request)
