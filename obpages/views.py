@@ -172,7 +172,6 @@ class ContentSearchView(TemplateView):
         index = SearchIndex.objects.get(pk=MEILISEARCH_INDEX)
         queryset = ContentItem.objects.select_subclasses()
         query, opt_params = form.get_query()
-        print(f"Query looks like {query}, with params {opt_params}")
         paginator = obpages.paginator.MeiliPaginator(
             index=index,
             queryset=queryset,

@@ -20,7 +20,6 @@ class MeiliPaginator(django.core.paginator.Paginator):
         number = self.validate_number(number)
         opt_params = self.opt_params.copy()
         opt_params.update(**{"page": number, "hitsPerPage": self.per_page})
-        print(f"Executing search with query= {self.query}, params {opt_params}")
         results = self.index.search(self.query, opt_params)
 
         self.count = results["totalHits"]
