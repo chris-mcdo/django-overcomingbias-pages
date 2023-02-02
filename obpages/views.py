@@ -150,11 +150,8 @@ def feedback_done(request):
 
 class ContentSearchView(TemplateView):
     template_name = f"{OBPAGES_PAGES_PATH}/search.html"
-    form_class = ContentSearchForm
-    model = ContentItem
     paginate_by = RESULTS_PER_PAGE
     extra_context = {"title": "Search"}
-    search_field = "query"
     page_kwarg = "page"
 
     def get(self, request, *args, **kwargs):
