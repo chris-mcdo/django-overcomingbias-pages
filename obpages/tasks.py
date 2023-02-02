@@ -3,7 +3,7 @@ import logging
 import django.conf
 from django.contrib.admin.models import CHANGE, LogEntry
 from django.contrib.contenttypes.models import ContentType
-from huey.contrib.djhuey import task
+from huey.contrib import djhuey
 from obapi.models import OBContentItem
 
 import obpages.serialize
@@ -33,7 +33,7 @@ if USE_RECAPTCHA:
 logger = logging.getLogger(__name__)
 
 
-@task()
+@djhuey.db_task()
 def download_new_items():
     """Task which downloads new overcomingbias posts.
 
@@ -43,7 +43,7 @@ def download_new_items():
     OBContentItem.objects.download_new_items()
 
 
-@task()
+@djhuey.db_task()
 def update_edited_items(user_pk=None):
     """Task which downloads new overcomingbias posts.
 
@@ -66,7 +66,7 @@ def update_edited_items(user_pk=None):
             )
 
 
-@task()
+@djhuey.db_task()
 def update_search_index(index_pk):
     selected_index = SearchIndex.objects.get(pk=index_pk)
     selected_index.update_meili_index(
@@ -74,7 +74,7 @@ def update_search_index(index_pk):
     )
 
 
-@task()
+@djhuey.db_task()
 def drop_feedback_if_spam(feedback_pk: int, recaptcha_token: str):
     if not USE_RECAPTCHA:
         return
