@@ -113,7 +113,7 @@
         </main>
         {% block sidebar %}{% endblock %}
         <footer>
-            {% block footer %}<a href="{% url "feedback" %}">Feedback</a> - <a href="#site-header">Back to top</a> - <a href="{% url "about" %}">About</a>{% endblock %}
+            {% block footer %}<a href="{% url "feedback" %}">Feedback</a> - <a href="#site-header">Back to top</a> - <a href="{% url "api:openapi-view" %}">API</a> - <a href="{% url "about" %}">About</a>{% endblock %}
         </footer>
     </body>
 </html>
