@@ -32,6 +32,9 @@ jobs:
           pip install tox coverage
 
       - name: Test with coverage
+        env:
+          # Use the reviewed API revision until its Django 5.2 release is published.
+          OBAPI_TEST_SOURCE: "django-overcomingbias-api @ git+https://github.com/chris-mcdo/django-overcomingbias-api.git@027b7744f6d2e2659c71fc86f73abbed52087275"
         run: "tox -e py313-coverage"
 
       - name: Generate coverage report
