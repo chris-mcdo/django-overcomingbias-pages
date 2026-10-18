@@ -21,10 +21,10 @@ jobs:
       #   with:
       #     pandoc-version: "2.18"
 
-      - name: Set up python 3.8
+      - name: Set up python 3.13
         uses: actions/setup-python@v4
         with:
-          python-version: "3.8"
+          python-version: "3.13"
 
       - name: Install dependencies
         run: |
@@ -32,7 +32,10 @@ jobs:
           pip install tox coverage
 
       - name: Test with coverage
-        run: "tox -e py38-coverage"
+        env:
+          # Use the reviewed API revision until its Django 5.2 release is published.
+          OBAPI_TEST_SOURCE: "django-overcomingbias-api @ git+https://github.com/chris-mcdo/django-overcomingbias-api.git@68b5a5f592836f9b42330e482333f5a12cb0c21d"
+        run: "tox -e py313-coverage"
 
       - name: Generate coverage report
         run: python -m coverage xml

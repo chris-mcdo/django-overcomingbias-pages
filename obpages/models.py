@@ -20,6 +20,17 @@ USER_SLUG_MAX_LENGTH = 150
 
 
 MEILISEARCH_INDEX_SETTINGS = {
+    # Preserve the previous "attribute" rule before sort using its two current
+    # equivalents; the engine's newer defaults place sort between them.
+    "rankingRules": [
+        "words",
+        "typo",
+        "proximity",
+        "attributeRank",
+        "wordPosition",
+        "sort",
+        "exactness",
+    ],
     "filterableAttributes": ["authors", "topics", "ideas", "content_type"],
     "displayedAttributes": [
         "pk",
@@ -50,12 +61,12 @@ class SearchIndex(models.Model):
     def _index(self):
         try:
             return self._client.get_index(self.index_uid)
-        except meilisearch.errors.MeiliSearchCommunicationError:
+        except meilisearch.errors.MeilisearchCommunicationError:
             logger.warning(
                 "Could not connect to MeiliSearch instance."
                 " Using a dummy index instead."
             )
-        except meilisearch.errors.MeiliSearchApiError:
+        except meilisearch.errors.MeilisearchApiError:
             logger.warning(
                 "Could not retrieve MeiliSearch index. Using a dummy index instead."
             )
@@ -69,7 +80,7 @@ class SearchIndex(models.Model):
         """
         try:
             self.delete_meili_index()
-        except meilisearch.errors.MeiliSearchError as exc:
+        except meilisearch.errors.MeilisearchError as exc:
             logger.warning(f"Could not delete MeiliSearch index. {exc.message}")
         finally:
             super().delete()
@@ -77,7 +88,7 @@ class SearchIndex(models.Model):
     def create_meili_index(self):
         # create index
         self.wait_for_task(
-            self._client.create_index(self.index_uid, {"primaryKey": "pk"})["taskUid"]
+            self._client.create_index(self.index_uid, {"primaryKey": "pk"}).task_uid
         )
         # reset index cache
         self.__dict__.pop("_index", None)
@@ -85,7 +96,7 @@ class SearchIndex(models.Model):
         self.update_meili_settings(MEILISEARCH_INDEX_SETTINGS)
 
     def update_meili_settings(self, index_settings):
-        self.wait_for_task(self._index.update_settings(index_settings)["taskUid"])
+        self.wait_for_task(self._index.update_settings(index_settings).task_uid)
 
     def delete_meili_index(self):
         """Delete the meilisearch index.
@@ -93,7 +104,7 @@ class SearchIndex(models.Model):
         Raises an error if the index does not exist.
         """
         # delete index
-        self.wait_for_task(self._index.delete()["taskUid"])
+        self.wait_for_task(self._index.delete().task_uid)
         # reset index cache
         self.__dict__.pop("_index", None)
         self.update_timestamp = None
@@ -126,7 +137,7 @@ class SearchIndex(models.Model):
             # Modified documents are fully replaced (rather than just updated)
             self.wait_for_task(self._index.add_documents(serialized_objs).task_uid)
 
-    def wait_for_task(self, task_uid, timeout_in_ms=60e3, interval_in_ms=100):
+    def wait_for_task(self, task_uid, timeout_in_ms=60_000, interval_in_ms=100):
         """Wait for a task to complete, and raise an error if it was unsuccessful.
 
         Allow a task 60 seconds to complete by default.
@@ -134,10 +145,10 @@ class SearchIndex(models.Model):
         completed_task = self._client.wait_for_task(
             task_uid, timeout_in_ms=timeout_in_ms, interval_in_ms=interval_in_ms
         )
-        task_status = completed_task["status"]
+        task_status = completed_task.status
         if task_status != "succeeded":
-            error = completed_task["error"]
-            exc = meilisearch.errors.MeiliSearchError(error["message"])
+            error = completed_task.error
+            exc = meilisearch.errors.MeilisearchError(error["message"])
             exc.code = error["code"]
             exc.link = error["link"]
             exc.type = error["type"]

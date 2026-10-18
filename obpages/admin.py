@@ -77,7 +77,7 @@ class SearchIndexAdmin(admin.ModelAdmin):
         for index in queryset:
             try:
                 index.create_meili_index()
-            except meilisearch.errors.MeiliSearchError as exc:
+            except meilisearch.errors.MeilisearchError as exc:
                 self.message_user(
                     request,
                     f'Error creating "{index.index_uid}". {exc.message}',
@@ -98,7 +98,7 @@ class SearchIndexAdmin(admin.ModelAdmin):
         for index in queryset:
             try:
                 index.delete_meili_index()
-            except meilisearch.errors.MeiliSearchError as exc:
+            except meilisearch.errors.MeilisearchError as exc:
                 self.message_user(
                     request,
                     f'Error deleting "{index.index_uid}". {exc.message}',
@@ -119,7 +119,7 @@ class SearchIndexAdmin(admin.ModelAdmin):
         for index in queryset:
             try:
                 obpages.tasks.update_search_index(index.pk)
-            except meilisearch.errors.MeiliSearchError as exc:
+            except meilisearch.errors.MeilisearchError as exc:
                 self.message_user(
                     request,
                     f'Error updating Meili index "{index.index_uid}". {exc.message}',
