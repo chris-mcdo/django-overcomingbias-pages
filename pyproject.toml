@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "django-overcomingbias-pages"
 description = "django app web interface to Robin Hanson's content"
 readme = "README.rst"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 license = { file = "LICENSE" }
 keywords = ["django", "overcomingbias", "scrape", "website", "content"]
 classifiers = [
@@ -18,9 +18,8 @@ classifiers = [
     "Operating System :: POSIX",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Internet",
     "Topic :: Internet :: WWW/HTTP",
     "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
@@ -29,8 +28,8 @@ classifiers = [
     "Framework :: Django",
 ]
 dependencies = [
-    "Django>=4.0,<5",
-    "meilisearch",
+    "Django>=5.2,<5.3",
+    "meilisearch>=0.43,<0.44",
     "huey>=2",
     "python-slugify>=5",
     "django-select2",
