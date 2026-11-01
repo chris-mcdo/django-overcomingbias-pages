@@ -100,15 +100,6 @@ class FeedbackView(CreateView):
     fields = ("feedback",)
     extra_context = {"title": "Feedback Form"}
 
-    def post(self, request):
-        if request.user.is_authenticated:
-            self.object = self.model(user=request.user)
-        form = self.get_form()
-        if form.is_valid():
-            return self.form_valid(form)
-        else:
-            return self.form_invalid(form)
-
     def get_form(self, form_class=None):
         form = super().get_form(form_class=form_class)
         placeholders = [
@@ -133,6 +124,8 @@ class FeedbackView(CreateView):
     def form_valid(self, form):
         # save first, then check if it came from a bot and delete
         # this lets the check be run asynchronously
+        if self.request.user.is_authenticated:
+            form.instance.user = self.request.user
         self.object = form.save()
 
         if USE_RECAPTCHA:
