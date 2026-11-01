@@ -16,10 +16,8 @@ jobs:
         with:
           persist-credentials: false
 
-      # - name: Set up pandoc
-      #   uses: r-lib/actions/setup-pandoc@v2
-      #   with:
-      #     pandoc-version: "2.18"
+      - name: Install Pandoc for view imports
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends pandoc
 
       - name: Set up python 3.13
         uses: actions/setup-python@v4
