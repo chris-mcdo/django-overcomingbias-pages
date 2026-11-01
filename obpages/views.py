@@ -536,7 +536,7 @@ class SequenceDeleteView(LoginRequiredMixin, DeleteView):
         return reverse("sequence_user_list", kwargs={"user_slug": user_slug})
 
 
-class SequenceMemberMoveView(FormMixin, View):
+class SequenceMemberMoveView(LoginRequiredMixin, FormMixin, View):
     form_class = SequenceMemberMoveForm
 
     def post(self, request, user_slug, sequence_slug, order):
@@ -557,6 +557,7 @@ class SequenceMemberMoveView(FormMixin, View):
         else:
             return get_object_or_404(
                 UserSequenceMember,
+                sequence__owner=self.request.user,
                 sequence__owner__slug=self.kwargs.get("user_slug"),
                 sequence__slug=self.kwargs.get("sequence_slug"),
                 order=self.kwargs.get("order"),
@@ -597,9 +598,11 @@ class SequenceMemberMoveView(FormMixin, View):
 
 
 @require_POST
+@login_required
 def sequencemember_delete_view(request, user_slug, sequence_slug, order):
     sequence_member = get_object_or_404(
         UserSequenceMember,
+        sequence__owner=request.user,
         sequence__owner__slug=user_slug,
         sequence__slug=sequence_slug,
         order=order,
